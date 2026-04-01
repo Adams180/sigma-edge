@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';import { useAuth } from '../contexts/AuthContext';
 import { PageHeader } from '../components/ui';
 import { Settings, User, CreditCard, Bell, Shield, Check, Zap, Crown } from 'lucide-react';
 
@@ -60,14 +59,37 @@ const TIERS = [
   },
 ];
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export default function SettingsPage() {
-  const { user } = useAuth();
-  const [currentTier] = useState('free');
+  const { user, profile } = useAuth();
+  const currentTier = profile?.tier ?? 'free';
   const [notifications, setNotifications] = useState({
     signals: true,
     daily: false,
     weekly: true,
   });
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
+
+  async function handleUpgrade(tierId) {
+    if (!user) return;
+    setCheckoutLoading(tierId);
+    try {
+      const res = await fetch(`${API_URL}/api/billing/create-checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: tierId, user_id: user.id, email: user.email }),
+      });
+      if (!res.ok) throw new Error('Failed to create checkout session');
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch (err) {
+      console.error('Checkout error:', err);
+      alert('Could not start checkout. Please try again.');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  }
 
   return (
     <div>
@@ -181,7 +203,8 @@ export default function SettingsPage() {
                 </ul>
 
                 <button
-                  disabled={isCurrent}
+                  disabled={isCurrent || checkoutLoading === tier.id}
+                  onClick={() => !isCurrent && handleUpgrade(tier.id)}
                   className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     isCurrent
                       ? 'bg-bg-hover text-text-muted cursor-default'
@@ -190,7 +213,7 @@ export default function SettingsPage() {
                         : `${tier.bg} ${tier.color} border ${tier.border} hover:opacity-80`
                   }`}
                 >
-                  {isCurrent ? 'Current Plan' : `Upgrade to ${tier.name}`}
+                  {isCurrent ? 'Current Plan' : checkoutLoading === tier.id ? 'Loading…' : `Upgrade to ${tier.name}`}
                 </button>
               </div>
             );

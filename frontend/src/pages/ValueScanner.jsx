@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
-import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, EVBadge } from '../components/ui';
+import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, EVBadge, ProGate } from '../components/ui';
 import { TrendingUp, Search, SlidersHorizontal, Wifi, WifiOff } from 'lucide-react';
+import { useTier } from '../hooks/useTier';
 
 function formatKickoff(iso) {
   if (!iso) return '';
@@ -10,6 +11,7 @@ function formatKickoff(iso) {
 }
 
 export default function ValueScanner() {
+  const { isPro } = useTier();
   const [bankroll] = useState(1000);
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +56,12 @@ export default function ValueScanner() {
     }
     load();
   }, [bankroll]);
+
+  if (!isPro) {
+    return (
+      <ProGate feature="Live Value Scanner" blur={false} />
+    );
+  }
 
   return (
     <div>

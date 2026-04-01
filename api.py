@@ -22,6 +22,7 @@ from config import CURRENT_SEASON, LEAGUES
 from database import get_conn, init_db
 from inefficiency_scanner import InefficiencyScanner
 from probability_engine import ProbabilityEngine
+from billing import router as billing_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,7 +36,11 @@ app = FastAPI(title="BET Dashboard API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://sigma-edge.vercel.app",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -43,6 +48,8 @@ app.add_middleware(
 engine = ProbabilityEngine()
 
 LEAGUE_NAMES = {lid: name for lid, (name, _) in LEAGUES.items()}
+
+app.include_router(billing_router)
 
 
 @app.on_event("startup")

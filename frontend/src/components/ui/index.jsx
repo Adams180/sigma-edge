@@ -1,4 +1,5 @@
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+export { default as ProGate } from './ProGate';
 
 export function MetricCard({ label, value, change, changeLabel, icon: Icon, variant = 'default' }) {
   const isPositive = change > 0;

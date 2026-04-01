@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { PageHeader, LoadingSpinner, LeagueBadge, EVBadge } from '../components/ui';
+import { PageHeader, LoadingSpinner, LeagueBadge, EVBadge, ProGate } from '../components/ui';
 import { History, Search, Filter, ChevronDown, ChevronUp, CheckCircle, XCircle, ArrowUpDown } from 'lucide-react';
+import { useTier } from '../hooks/useTier';
 
 async function loadBacktest() {
   const res = await fetch('/data/backtest_v2_results.json');
@@ -9,6 +10,7 @@ async function loadBacktest() {
 }
 
 export default function SignalHistory() {
+  const { isPro } = useTier();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leagueFilter, setLeagueFilter] = useState('all');
@@ -90,6 +92,12 @@ export default function SignalHistory() {
   }
 
   if (loading) return <LoadingSpinner label="Loading signal history..." />;
+
+  if (!isPro) {
+    return (
+      <ProGate feature="Full Signal History (all leagues, all seasons)" blur={false} />
+    );
+  }
 
   return (
     <div>
