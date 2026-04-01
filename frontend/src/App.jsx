@@ -10,6 +10,7 @@ import LineupAlerts from './pages/LineupAlerts';
 import LiveFeed from './pages/LiveFeed';
 import Performance from './pages/Performance';
 import AuthPage from './pages/AuthPage';
+import AuthCallback from './pages/AuthCallback';
 import SettingsPage from './pages/SettingsPage';
 
 function ProtectedRoute({ children }) {
@@ -52,6 +53,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<AuthRoute />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/*" element={
             <ProtectedRoute>
               <AppLayout />
