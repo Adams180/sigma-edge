@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MetricCard, PageHeader, LoadingSpinner } from '../components/ui';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   TrendingUp, Target, BarChart3, Activity, Percent, Award,
   ChevronDown, ChevronUp, Zap, AlertTriangle
@@ -29,23 +30,34 @@ function formatMoney(v) {
 }
 
 const LEAGUE_COLORS = {
-  'Premier League': '#6366f1',
-  'Ligue 1': '#06b6d4',
-  'La Liga': '#f59e0b',
+  'Premier League': '#635BFF',
+  'Ligue 1': '#0EBFE9',
+  'La Liga': '#F5A623',
   'Serie A': '#64748b',
   'Bundesliga': '#64748b',
 };
 
 const OUTCOME_COLORS = {
-  'Home': '#00D4AA',
-  'Draw': '#f59e0b',
-  'Away': '#8B5CF6',
+  'Home': '#635BFF',
+  'Draw': '#F5A623',
+  'Away': '#0EBFE9',
 };
 
 export default function Performance() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useTheme();
+
+  const chartColors = {
+    primary: '#635BFF',
+    success: '#30B130',
+    danger: '#DF1B41',
+    grid: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)',
+    tick: theme === 'dark' ? '#64748b' : '#8898aa',
+    tooltipBg: theme === 'dark' ? '#1a1f36' : '#ffffff',
+    tooltipBorder: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+  };
 
   useEffect(() => {
     loadResults()
@@ -56,7 +68,7 @@ export default function Performance() {
 
   if (loading) return <LoadingSpinner label="Loading backtest results..." />;
   if (error) return (
-    <div className="glass-card p-8 text-center">
+    <div className="stripe-card p-8 text-center">
       <AlertTriangle className="mx-auto mb-3 text-warning" size={32} />
       <p className="text-sm text-text-muted">Could not load backtest data: {error}</p>
       <p className="text-xs text-text-muted mt-2">Run <code className="text-primary">python backtest_v2.py --seasons 5</code> to generate results.</p>
@@ -118,28 +130,28 @@ export default function Performance() {
       </div>
 
       {/* Bankroll Curve */}
-      <div className="glass-card p-6 mb-6">
-        <h2 className="text-lg font-semibold text-text-primary mb-1">Bankroll Curve</h2>
-        <p className="text-xs text-text-muted mb-4">$1,000 starting bankroll — fractional Kelly staking</p>
+      <div className="stripe-card p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Bankroll Curve</h2>
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>$1,000 starting bankroll — fractional Kelly staking</p>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={bankrollData} margin={{ top: 5, right: 20, bottom: 5, left: 10 }}>
               <defs>
                 <linearGradient id="bankrollGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#00D4AA" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#00D4AA" stopOpacity={0} />
+                  <stop offset="0%" stopColor={chartColors.primary} stopOpacity={0.3} />
+                  <stop offset="100%" stopColor={chartColors.primary} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} domain={['dataMin - 20', 'dataMax + 20']}
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+              <XAxis dataKey="date" tick={{ fontSize: 10, fill: chartColors.tick }} tickLine={false} interval="preserveStartEnd" />
+              <YAxis tick={{ fontSize: 10, fill: chartColors.tick }} tickLine={false} domain={['dataMin - 20', 'dataMax + 20']}
                 tickFormatter={v => `$${v}`} />
               <Tooltip
-                contentStyle={{ background: '#141720', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
-                labelStyle={{ color: '#94a3b8' }}
+                contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: chartColors.tick }}
                 formatter={v => [`$${v.toFixed(2)}`, 'Bankroll']}
               />
-              <Area type="monotone" dataKey="bankroll" stroke="#00D4AA" strokeWidth={2}
+              <Area type="monotone" dataKey="bankroll" stroke={chartColors.primary} strokeWidth={2}
                 fill="url(#bankrollGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
@@ -148,22 +160,22 @@ export default function Performance() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Monthly P&L */}
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-text-primary mb-1">Monthly P&L</h2>
-          <p className="text-xs text-text-muted mb-4">Net profit/loss per calendar month</p>
+        <div className="stripe-card p-6">
+          <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Monthly P&L</h2>
+          <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>Net profit/loss per calendar month</p>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData} margin={{ top: 5, right: 10, bottom: 5, left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#64748b' }} tickLine={false} interval={0} angle={-45} textAnchor="end" height={40} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} tickFormatter={v => `$${v}`} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: chartColors.tick }} tickLine={false} interval={0} angle={-45} textAnchor="end" height={40} />
+                <YAxis tick={{ fontSize: 10, fill: chartColors.tick }} tickLine={false} tickFormatter={v => `$${v}`} />
                 <Tooltip
-                  contentStyle={{ background: '#141720', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, borderRadius: 8, fontSize: 12 }}
                   formatter={v => [`$${v.toFixed(2)}`, 'P&L']}
                 />
                 <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
                   {monthlyData.map((entry, i) => (
-                    <Cell key={i} fill={entry.pnl >= 0 ? '#00D4AA' : '#ef4444'} />
+                    <Cell key={i} fill={entry.pnl >= 0 ? chartColors.success : chartColors.danger} />
                   ))}
                 </Bar>
               </BarChart>
@@ -172,8 +184,8 @@ export default function Performance() {
         </div>
 
         {/* League Breakdown */}
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-text-primary mb-4">League Performance</h2>
+        <div className="stripe-card p-6">
+          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>League Performance</h2>
           <div className="space-y-4">
             {leagues.map(l => (
               <div key={l.name} className="flex items-center gap-4">
@@ -209,7 +221,7 @@ export default function Performance() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Outcome Breakdown */}
-        <div className="glass-card p-6">
+        <div className="stripe-card p-6">
           <h2 className="text-lg font-semibold text-text-primary mb-4">By Outcome</h2>
           <div className="space-y-3">
             {outcomes.map(o => (
@@ -230,7 +242,7 @@ export default function Performance() {
         </div>
 
         {/* Key Stats */}
-        <div className="glass-card p-6">
+        <div className="stripe-card p-6">
           <h2 className="text-lg font-semibold text-text-primary mb-4">Key Statistics</h2>
           <div className="space-y-3">
             {[
@@ -255,7 +267,7 @@ export default function Performance() {
 
         {/* Edge Buckets */}
         {edge_buckets && (
-          <div className="glass-card p-6">
+          <div className="stripe-card p-6">
             <h2 className="text-lg font-semibold text-text-primary mb-4">Edge Distribution</h2>
             <div className="space-y-3">
               {Object.entries(edge_buckets).map(([bucket, stats]) => (
@@ -275,7 +287,7 @@ export default function Performance() {
       </div>
 
       {/* Model Info Footer */}
-      <div className="glass-card p-4 text-center">
+      <div className="stripe-card p-4 text-center">
         <p className="text-xs text-text-muted">
           Dixon-Coles Poisson · Isotonic Calibration · Venue-Split Strength · Exponential Decay ·
           Fractional Kelly · Generated {data.generated_at ? new Date(data.generated_at).toLocaleString() : 'N/A'}

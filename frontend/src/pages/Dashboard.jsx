@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { MetricCard, PageHeader, LoadingSpinner, LeagueBadge, EVBadge } from '../components/ui';
 import { TrendingUp, Target, Zap, BarChart3, ArrowRight, Trophy, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { useTheme } from '../contexts/ThemeContext';
 
 async function loadBacktest() {
   const res = await fetch('/data/backtest_v2_results.json');
@@ -13,6 +14,7 @@ async function loadBacktest() {
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
 
   useEffect(() => {
     loadBacktest().then(setData).catch(() => {}).finally(() => setLoading(false));
@@ -20,7 +22,7 @@ export default function Dashboard() {
 
   const s = data?.summary;
   const signals = data?.signals || [];
-  const recentSignals = signals.slice(-20).reverse(); // Last 20 signals, newest first
+  const recentSignals = signals.slice(-20).reverse();
   const leagueStats = data?.league_stats || {};
 
   // Mini bankroll chart data
@@ -30,24 +32,34 @@ export default function Dashboard() {
   }
   const sparkData = Array.from(bankrollMap.entries()).map(([d, v]) => ({ d, v: +v.toFixed(0) }));
 
+  // Stripe-style chart colors
+  const chartColors = {
+    stroke: '#635BFF',
+    gradientStart: 'rgba(99, 91, 255, 0.2)',
+    gradientEnd: 'rgba(99, 91, 255, 0)',
+    grid: theme === 'dark' ? 'rgba(255,255,255,0.06)' : '#E3E8EE',
+    tooltip: {
+      bg: theme === 'dark' ? '#132F4C' : '#FFFFFF',
+      border: theme === 'dark' ? 'rgba(255,255,255,0.12)' : '#D8DEE4',
+      text: theme === 'dark' ? '#FFFFFF' : '#1A1F36',
+    },
+  };
+
   return (
     <div>
-      <PageHeader title="Dashboard" subtitle="Sigma Edge — AI-powered betting intelligence">
-        <Link to="/performance" className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-bg-card border border-border-subtle hover:border-primary/40 transition-colors">
-          <Trophy size={14} className="text-primary" />
-          <span className="text-xs font-medium text-text-secondary">
-            {s ? `+${s.roi_pct.toFixed(1)}% ROI Proven` : 'View Performance'}
-          </span>
+      <PageHeader title="Dashboard" subtitle="AI-powered betting intelligence overview">
+        <Link to="/performance" className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)] text-sm font-medium transition-all">
+          <Trophy size={14} className="text-[var(--color-primary)]" />
+          {s ? `+${s.roi_pct.toFixed(1)}% ROI Proven` : 'View Performance'}
         </Link>
       </PageHeader>
 
-      {/* KPI Grid */}
+      {/* KPI Grid — Stripe style metric cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <MetricCard
           label="Proven ROI"
           value={loading ? '...' : s ? `+${s.roi_pct.toFixed(1)}%` : '—'}
           icon={TrendingUp}
-          variant="primary"
         />
         <MetricCard
           label="Total Signals"
@@ -78,30 +90,43 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Bankroll mini-chart */}
+      {/* Bankroll Chart — Stripe style */}
       {sparkData.length > 0 && (
-        <div className="glass-card p-5 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-text-primary">Bankroll Growth</h2>
-            <Link to="/performance" className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-light transition-colors">
+        <div className="stripe-card p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Bankroll Growth</h2>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Cumulative performance over time</p>
+            </div>
+            <Link to="/performance" className="flex items-center gap-1 text-sm font-medium text-[var(--color-text-link)] hover:underline transition-colors">
               Full Report <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="h-32">
+          <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={sparkData}>
                 <defs>
                   <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00D4AA" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#00D4AA" stopOpacity={0} />
+                    <stop offset="0%" stopColor={chartColors.gradientStart.replace('rgba', 'rgb').replace(',0.2)', ')')} stopOpacity={0.2} />
+                    <stop offset="100%" stopColor={chartColors.stroke} stopOpacity={0} />
                   </linearGradient>
                 </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                <XAxis dataKey="d" hide />
+                <YAxis hide />
                 <Tooltip
-                  contentStyle={{ background: '#141720', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{
+                    background: chartColors.tooltip.bg,
+                    border: `1px solid ${chartColors.tooltip.border}`,
+                    borderRadius: 8,
+                    fontSize: 13,
+                    color: chartColors.tooltip.text,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  }}
                   formatter={v => [`$${v}`, 'Bankroll']}
                   labelFormatter={l => l}
                 />
-                <Area type="monotone" dataKey="v" stroke="#00D4AA" strokeWidth={2} fill="url(#sparkGrad)" dot={false} />
+                <Area type="monotone" dataKey="v" stroke={chartColors.stroke} strokeWidth={2} fill="url(#sparkGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -112,34 +137,34 @@ export default function Dashboard() {
         {/* Recent Signals — 3 cols */}
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-text-primary">Recent Signals</h2>
-            <Link to="/signals" className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-light transition-colors">
+            <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Recent Signals</h2>
+            <Link to="/signals" className="flex items-center gap-1 text-sm font-medium text-[var(--color-text-link)] hover:underline transition-colors">
               View All <ArrowRight size={14} />
             </Link>
           </div>
           {loading ? (
             <LoadingSpinner label="Loading..." />
           ) : recentSignals.length === 0 ? (
-            <div className="glass-card p-8 text-center">
-              <p className="text-sm text-text-muted">No signal data. Run the backtest to generate results.</p>
+            <div className="stripe-card p-8 text-center">
+              <p className="text-sm text-[var(--color-text-muted)]">No signal data. Run the backtest to generate results.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {recentSignals.slice(0, 8).map((sig, i) => (
-                <div key={`${sig.date}-${sig.match}-${i}`} className={`glass-card p-4 ${sig.won ? 'border-l-2 border-l-success' : 'border-l-2 border-l-danger'}`}>
+                <div key={`${sig.date}-${sig.match}-${i}`} className={`stripe-card p-4 ${sig.won ? 'border-l-2 border-l-[var(--color-success)]' : 'border-l-2 border-l-[var(--color-danger)]'}`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <LeagueBadge league={sig.league} />
-                      <span className="text-sm font-semibold text-text-primary">{sig.match}</span>
+                      <span className="text-sm font-medium text-[var(--color-text-primary)]">{sig.match}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <EVBadge ev={sig.ev} />
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${sig.won ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${sig.won ? 'bg-[var(--color-success-dim)] text-[var(--color-success)]' : 'bg-[var(--color-danger-dim)] text-[var(--color-danger)]'}`}>
                         {sig.won ? `+$${sig.pnl.toFixed(0)}` : `-$${Math.abs(sig.pnl).toFixed(0)}`}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-text-muted">
+                  <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
                     <span>{sig.date}</span>
                     <span>{sig.outcome} @ {sig.odds.toFixed(2)}</span>
                     <span>Model: {(sig.calibrated_prob * 100).toFixed(0)}% vs Market: {(sig.market_prob * 100).toFixed(0)}%</span>
@@ -153,29 +178,29 @@ export default function Dashboard() {
 
         {/* League Performance — 2 cols */}
         <div className="lg:col-span-2">
-          <h2 className="text-lg font-semibold text-text-primary mb-4">League Performance</h2>
+          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">League Performance</h2>
           <div className="space-y-3">
             {Object.entries(leagueStats).map(([name, stats]) => (
-              <div key={name} className="glass-card p-4">
+              <div key={name} className="stripe-card p-4">
                 <div className="flex items-center justify-between mb-2">
                   <LeagueBadge league={name} />
-                  <span className={`text-sm font-bold ${stats.roi_pct >= 0 ? 'text-success' : 'text-danger'}`}>
+                  <span className={`text-sm font-bold ${stats.roi_pct >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
                     {stats.roi_pct >= 0 ? '+' : ''}{stats.roi_pct.toFixed(1)}% ROI
                   </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-text-muted">
+                <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
                   <span>{stats.signals} signals</span>
                   <span>{(stats.hit_rate * 100).toFixed(0)}% hit rate</span>
-                  <span className={stats.pnl >= 0 ? 'text-success' : 'text-danger'}>
+                  <span className={stats.pnl >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}>
                     {stats.pnl >= 0 ? '+' : ''}${stats.pnl.toFixed(0)}
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 rounded-full bg-bg-hover overflow-hidden">
+                <div className="mt-2 h-1.5 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${Math.min(Math.abs(stats.roi_pct), 50)}%`,
-                      background: stats.roi_pct >= 0 ? '#00D4AA' : '#ef4444',
+                      background: stats.roi_pct >= 0 ? 'var(--color-success)' : 'var(--color-danger)',
                     }}
                   />
                 </div>
@@ -185,8 +210,8 @@ export default function Dashboard() {
 
           {/* Quick Stats */}
           {s && (
-            <div className="glass-card p-4 mt-3">
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Quick Stats</h3>
+            <div className="stripe-card p-4 mt-3">
+              <h3 className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Quick Stats</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Win / Loss', value: `${s.wins} / ${s.losses}` },
@@ -195,8 +220,8 @@ export default function Dashboard() {
                   { label: 'Worst Streak', value: `${Math.abs(s.worst_streak)}L` },
                 ].map(stat => (
                   <div key={stat.label} className="flex justify-between text-xs">
-                    <span className="text-text-muted">{stat.label}</span>
-                    <span className="text-text-primary font-semibold">{stat.value}</span>
+                    <span className="text-[var(--color-text-muted)]">{stat.label}</span>
+                    <span className="text-[var(--color-text-primary)] font-semibold">{stat.value}</span>
                   </div>
                 ))}
               </div>

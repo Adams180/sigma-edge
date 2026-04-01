@@ -65,7 +65,7 @@ export default function LineupAlerts() {
       </PageHeader>
 
       {/* Preview banner */}
-      <div className="glass-card p-4 mb-6 flex items-start gap-3 border-l-2 border-l-orange-500/50">
+      <div className="stripe-card p-4 mb-6 flex items-start gap-3 border-l-2 border-l-orange-500/50">
         <Info size={16} className="text-orange-400 mt-0.5 shrink-0" />
         <div className="text-xs text-text-secondary leading-relaxed">
           <span className="font-semibold text-text-primary">Feature Preview</span> — These are sample alerts showing how the monitor works.
@@ -91,7 +91,7 @@ export default function LineupAlerts() {
       {/* Alert Cards */}
       <div className="space-y-4">
         {filtered.map((a) => (
-          <div key={a.id} className="glass-card p-6 border-l-2 border-l-red-500/40">
+          <div key={a.id} className="stripe-card p-6 border-l-2 border-l-red-500/40">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">

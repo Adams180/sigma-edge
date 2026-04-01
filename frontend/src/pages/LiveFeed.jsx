@@ -81,7 +81,7 @@ export default function LiveFeed() {
             const isOpen = expanded === i;
             return (
               <div key={`${s.date}-${s.match}-${i}`}
-                className={`glass-card overflow-hidden transition-all cursor-pointer ${
+                className={`stripe-card overflow-hidden transition-all cursor-pointer ${
                   s.won ? 'border-l-2 border-l-green-500/60' : 'border-l-2 border-l-red-500/40'
                 }`}
                 onClick={() => setExpanded(isOpen ? null : i)}

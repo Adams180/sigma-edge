@@ -78,7 +78,7 @@ export default function ValueScanner() {
       {loading ? (
         <LoadingSpinner label="Scanning for market edges..." />
       ) : error ? (
-        <div className="glass-card p-6 text-center text-danger text-sm">{error}</div>
+        <div className="stripe-card p-6 text-center text-danger text-sm">{error}</div>
       ) : signals.length === 0 ? (
         <EmptyState
           icon={Search}
@@ -88,7 +88,7 @@ export default function ValueScanner() {
       ) : (
         <>
           {/* Summary bar */}
-          <div className="glass-card p-4 mb-6 flex items-center justify-between">
+          <div className="stripe-card p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-success animate-pulse' : 'bg-warning'}`} />
@@ -111,7 +111,7 @@ export default function ValueScanner() {
             {signals.map((s, i) => (
               <div
                 key={`${s.match}-${s.outcome}-${i}`}
-                className={`glass-card p-6 ${s.won === false ? 'border-l-2 border-l-danger' : s.won === true ? 'border-l-2 border-l-success' : 'signal-glow-green'}`}
+                className={`stripe-card p-6 ${s.won === false ? 'border-l-2 border-l-danger' : s.won === true ? 'border-l-2 border-l-success' : 'signal-glow-green'}`}
               >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">

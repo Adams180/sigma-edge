@@ -109,7 +109,7 @@ export default function SignalHistory() {
       </PageHeader>
 
       {/* Filters */}
-      <div className="glass-card p-4 mb-6">
+      <div className="stripe-card p-4 mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <Filter size={14} className="text-text-muted" />
@@ -170,7 +170,7 @@ export default function SignalHistory() {
 
       {/* Summary bar */}
       {stats && (
-        <div className="glass-card p-4 mb-6 flex flex-wrap items-center gap-6">
+        <div className="stripe-card p-4 mb-6 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="text-xs text-text-muted">Showing</span>
             <span className="text-sm font-bold text-text-primary">{stats.count}</span>
@@ -199,11 +199,11 @@ export default function SignalHistory() {
 
       {/* Signal table */}
       {filtered.length === 0 ? (
-        <div className="glass-card p-8 text-center">
+        <div className="stripe-card p-8 text-center">
           <p className="text-sm text-text-muted">No signals match your filters.</p>
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
+        <div className="stripe-card overflow-hidden">
           {/* Table header */}
           <div className="grid grid-cols-[100px_1fr_90px_70px_70px_80px_70px_80px_70px] gap-2 px-5 py-3 border-b border-border-subtle bg-bg-hover/30">
             <SortBtn field="date">Date</SortBtn>

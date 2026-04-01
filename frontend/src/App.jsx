@@ -16,8 +16,8 @@ import SettingsPage from './pages/SettingsPage';
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return (
-    <div className="min-h-screen bg-bg-base flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg-base)' }}>
+      <div className="w-8 h-8 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
     </div>
   );
   if (!user) return <Navigate to="/login" replace />;
@@ -28,10 +28,10 @@ function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-bg-base">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-base)' }}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <main className={`flex-1 overflow-y-auto transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
-        <div className="max-w-[1600px] mx-auto p-6 lg:p-8">
+        <div className="max-w-[1400px] mx-auto p-6 lg:p-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/scanner" element={<ValueScanner />} />

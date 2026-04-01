@@ -1,88 +1,221 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════
+   SIGMA EDGE — Stripe-Inspired Design System
+   Light & Dark mode via .light / .dark on <html>
+   ═══════════════════════════════════════════════════════════ */
+
 @theme {
-  /* ─── Background Layers ─── */
-  --color-bg-base: #06070A;
-  --color-bg-surface: #0D0F14;
-  --color-bg-card: #141720;
-  --color-bg-elevated: #1A1D28;
-  --color-bg-hover: #1F2233;
+  /* ── Primary (Stripe Indigo) ── */
+  --color-primary: #635BFF;
+  --color-primary-light: #7A73FF;
+  --color-primary-dark: #4B45C6;
+  --color-primary-dim: rgba(99, 91, 255, 0.1);
+  --color-primary-glow: rgba(99, 91, 255, 0.35);
 
-  /* ─── Borders ─── */
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-default: rgba(255, 255, 255, 0.1);
-  --color-border-strong: rgba(255, 255, 255, 0.15);
+  /* ── Accent (Stripe Cyan) ── */
+  --color-accent: #0EBFE9;
+  --color-accent-light: #36CCEF;
+  --color-accent-dim: rgba(14, 191, 233, 0.1);
 
-  /* ─── Text ─── */
-  --color-text-primary: #E8EAF0;
-  --color-text-secondary: #8B8FA3;
-  --color-text-muted: #5A5E72;
+  /* ── Semantic ── */
+  --color-success: #30B130;
+  --color-success-dim: rgba(48, 177, 48, 0.1);
+  --color-danger: #DF1B41;
+  --color-danger-dim: rgba(223, 27, 65, 0.1);
+  --color-warning: #F5A623;
+  --color-warning-dim: rgba(245, 166, 35, 0.1);
+  --color-info: #0055DE;
+  --color-info-dim: rgba(0, 85, 222, 0.1);
 
-  /* ─── Primary (Teal/Cyan) ─── */
-  --color-primary: #00D4AA;
-  --color-primary-light: #00E6BB;
-  --color-primary-dim: rgba(0, 212, 170, 0.15);
-  --color-primary-glow: rgba(0, 212, 170, 0.4);
+  /* ── Background Layers (dark defaults — overridden in .light) ── */
+  --color-bg-base: #0A2540;
+  --color-bg-surface: #0E2F4F;
+  --color-bg-card: #132F4C;
+  --color-bg-elevated: #1A3A5C;
+  --color-bg-hover: #1E4976;
 
-  /* ─── Accent (Purple/Blue) ─── */
-  --color-accent: #8B5CF6;
-  --color-accent-light: #A78BFA;
-  --color-accent-dim: rgba(139, 92, 246, 0.15);
+  /* ── Borders (dark defaults) ── */
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-default: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.20);
 
-  /* ─── Semantic ─── */
-  --color-success: #00E676;
-  --color-success-dim: rgba(0, 230, 118, 0.12);
-  --color-danger: #FF5252;
-  --color-danger-dim: rgba(255, 82, 82, 0.12);
-  --color-warning: #FFB020;
-  --color-warning-dim: rgba(255, 176, 32, 0.12);
-  --color-info: #448AFF;
-  --color-info-dim: rgba(68, 138, 255, 0.12);
+  /* ── Text (dark defaults) ── */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A3ACB9;
+  --color-text-muted: #697386;
 
-  /* ─── Font ─── */
+  /* ── Font ── */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* ─── Glassmorphism Card ─── */
-.glass-card {
-  background: linear-gradient(135deg, rgba(20, 23, 32, 0.8), rgba(13, 15, 20, 0.9));
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE (default) — extra custom properties
+   ═══════════════════════════════════════════════════════════ */
+:root, .dark {
+  --color-bg-input: #132F4C;
+  --color-bg-wash: #091B2F;
+  --color-border-focus: #635BFF;
+  --color-text-link: #7A73FF;
+  --color-text-on-primary: #FFFFFF;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+  --color-shadow-card: rgba(0, 0, 0, 0.3);
+  --stripe-gradient: linear-gradient(135deg, #635BFF 0%, #0EBFE9 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE — override all theme-dependent vars
+   ═══════════════════════════════════════════════════════════ */
+.light {
+  --color-bg-base: #F6F8FA;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-elevated: #F0F3F7;
+  --color-bg-hover: #E3E8EE;
+  --color-bg-input: #FFFFFF;
+  --color-bg-wash: #F0F3F7;
+
+  --color-border-subtle: #E3E8EE;
+  --color-border-default: #D8DEE4;
+  --color-border-strong: #C1C9D2;
+  --color-border-focus: #635BFF;
+
+  --color-text-primary: #1A1F36;
+  --color-text-secondary: #425466;
+  --color-text-muted: #697386;
+  --color-text-link: #635BFF;
+  --color-text-on-primary: #FFFFFF;
+
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow-card: rgba(0, 0, 0, 0.05);
+  --stripe-gradient: linear-gradient(135deg, #635BFF 0%, #0EBFE9 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════ */
+body {
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── Stripe Card ── */
+.stripe-card {
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border-subtle);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  transition: all 0.2s ease-out;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px var(--color-shadow-card), 0 1px 2px var(--color-shadow-card);
+  transition: all 0.15s ease;
+}
+
+.stripe-card:hover {
+  box-shadow: 0 4px 12px var(--color-shadow-card), 0 2px 4px var(--color-shadow-card);
+  border-color: var(--color-border-default);
+}
+
+/* glass-card alias for backwards compat */
+.glass-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px var(--color-shadow-card), 0 1px 2px var(--color-shadow-card);
+  transition: all 0.15s ease;
 }
 
 .glass-card:hover {
+  box-shadow: 0 4px 12px var(--color-shadow-card), 0 2px 4px var(--color-shadow-card);
   border-color: var(--color-border-default);
-  background: linear-gradient(135deg, rgba(26, 29, 40, 0.85), rgba(15, 17, 22, 0.95));
 }
 
-/* ─── Gradient Text ─── */
+/* ── Gradient Text ── */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #00B4D8 50%, var(--color-accent) 100%);
+  background: var(--stripe-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ─── Pulsing Glow Dot ─── */
+/* ── Stripe Button ── */
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-light);
+  box-shadow: 0 4px 12px var(--color-primary-dim);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  background: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+}
+
+/* ── Stripe Input ── */
+.stripe-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stripe-input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px var(--color-primary-dim);
+}
+
+.stripe-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ── Status Dots ── */
 .glow-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--color-success);
-  box-shadow: 0 0 8px var(--color-success), 0 0 16px rgba(0, 230, 118, 0.3);
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .glow-dot-danger {
   background: var(--color-danger);
-  box-shadow: 0 0 8px var(--color-danger), 0 0 16px rgba(255, 82, 82, 0.3);
 }
 
 .glow-dot-warning {
   background: var(--color-warning);
-  box-shadow: 0 0 8px var(--color-warning), 0 0 16px rgba(255, 176, 32, 0.3);
 }
 
 @keyframes pulse-glow {
@@ -90,27 +223,73 @@
   50% { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* ─── Scrollbar ─── */
+/* ── Scrollbar (both modes) ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-border-default);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong); }
 
-/* ─── Signal border glow ─── */
+/* ── Signal Border Indicators ── */
 .signal-glow-green {
-  border-left: 3px solid var(--color-primary);
-  box-shadow: inset 4px 0 12px -4px rgba(0, 212, 170, 0.15);
+  border-left: 3px solid var(--color-success);
 }
 
 .signal-glow-red {
   border-left: 3px solid var(--color-danger);
-  box-shadow: inset 4px 0 12px -4px rgba(255, 82, 82, 0.15);
 }
 
 .signal-glow-amber {
   border-left: 3px solid var(--color-warning);
-  box-shadow: inset 4px 0 12px -4px rgba(255, 176, 32, 0.15);
+}
+
+/* ── Stripe Auth Background ── */
+.auth-bg {
+  background: var(--color-bg-base);
+  position: relative;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: var(--stripe-gradient);
+  opacity: 0.04;
+}
+
+.light .auth-bg::before {
+  opacity: 0.03;
+}
+
+/* ── Stripe Divider ── */
+.stripe-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.stripe-divider::before,
+.stripe-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-subtle);
+}
+
+/* ── Focus Ring for Accessibility ── */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Transition Helper ── */
+.theme-transition {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }

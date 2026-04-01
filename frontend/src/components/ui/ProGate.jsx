@@ -26,29 +26,29 @@ export default function ProGate({ children, feature = 'this feature', allowedTie
 
       {/* Paywall overlay */}
       <div className={`${blur ? 'absolute inset-0' : ''} flex items-center justify-center`}>
-        <div className="glass-card p-8 text-center max-w-sm mx-auto border-primary/20 shadow-[0_0_40px_rgba(0,212,170,0.08)]">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
-            <Lock size={24} className="text-primary" />
+        <div className="stripe-card p-8 text-center max-w-sm mx-auto">
+          <div className="w-12 h-12 rounded-xl bg-[var(--color-primary-dim)] flex items-center justify-center mx-auto mb-4">
+            <Lock size={22} className="text-[var(--color-primary)]" />
           </div>
 
-          <h3 className="text-lg font-bold text-text-primary mb-2">
+          <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-2">
             Pro Feature
           </h3>
-          <p className="text-sm text-text-muted mb-6 leading-relaxed">
-            <span className="text-text-secondary font-medium">{feature}</span> is available on the Pro plan.
+          <p className="text-sm text-[var(--color-text-muted)] mb-6 leading-relaxed">
+            <span className="text-[var(--color-text-secondary)] font-medium">{feature}</span> is available on the Pro plan.
             Upgrade to unlock live signals, all leagues, and real-time alerts.
           </p>
 
           <div className="space-y-3">
             <button
               onClick={() => navigate('/settings')}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="w-full btn-primary flex items-center justify-center gap-2 py-2.5"
             >
               <Zap size={16} />
               Upgrade to Pro — $19/mo
               <ArrowRight size={14} />
             </button>
-            <p className="text-xs text-text-muted">Cancel anytime · Instant access</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Cancel anytime · Instant access</p>
           </div>
         </div>
       </div>

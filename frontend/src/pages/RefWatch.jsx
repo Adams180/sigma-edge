@@ -57,7 +57,7 @@ export default function RefWatch() {
       </PageHeader>
 
       {/* Info banner */}
-      <div className="glass-card p-4 mb-6 flex items-start gap-3 border-l-2 border-l-primary/50">
+      <div className="stripe-card p-4 mb-6 flex items-start gap-3 border-l-2 border-l-primary/50">
         <Info size={16} className="text-primary mt-0.5 shrink-0" />
         <div className="text-xs text-text-secondary leading-relaxed">
           <span className="font-semibold text-text-primary">Historical referee profiles</span> built from CSV match data. 
@@ -80,7 +80,7 @@ export default function RefWatch() {
       </div>
 
       {/* Referee Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="stripe-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
