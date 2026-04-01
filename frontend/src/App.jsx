@@ -67,7 +67,11 @@ export default function App() {
 
 function AuthRoute() {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg-base)' }}>
+      <div className="w-8 h-8 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
+    </div>
+  );
   if (user) return <Navigate to="/" replace />;
   return <AuthPage />;
 }

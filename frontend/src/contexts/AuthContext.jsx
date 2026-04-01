@@ -4,36 +4,45 @@ import { supabase } from '../lib/supabase';
 const AuthContext = createContext(null);
 
 async function fetchProfile(userId) {
-  const { data } = await supabase
-    .from('profiles')
-    .select('tier, bankroll, subscription_status')
-    .eq('id', userId)
-    .single();
-  return data;
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('tier, bankroll, subscription_status')
+      .eq('id', userId)
+      .single();
+    return data ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null); // { tier, bankroll, subscription_status }
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Sync auth state — no async work inside onAuthStateChange (Supabase v2 pattern)
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) setProfile(await fetchProfile(session.user.id));
+      if (!session?.user) setProfile(null);
       setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setProfile(session?.user ? await fetchProfile(session.user.id) : null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch profile separately whenever user changes
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchProfile(user.id).then(data => {
+      if (!cancelled) setProfile(data);
+    });
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   const signUp = async (email, password) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
