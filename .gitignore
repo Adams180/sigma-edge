@@ -1,0 +1,31 @@
+# Environment secrets — never commit
+.env.local
+.env.*.local
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Data — too large for git, download via csv_loader.py
+data/csv/
+bet_data.db
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
