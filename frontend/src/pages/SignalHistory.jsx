@@ -18,9 +18,14 @@ export default function SignalHistory() {
 
   useEffect(() => {
     api.v2Backtest()
-      .then(setData)
-      .catch(() => fetch('/data/backtest_v2_results.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setData(d); }).catch(() => {}))
-      .finally(() => setLoading(false));
+      .then(d => { setData(d); setLoading(false); })
+      .catch(() =>
+        fetch('/data/backtest_v2_results.json')
+          .then(r => r.ok ? r.json() : null)
+          .then(d => { if (d) setData(d); })
+          .catch(() => {})
+          .finally(() => setLoading(false))
+      );
   }, []);
 
   const signals = data?.signals || [];

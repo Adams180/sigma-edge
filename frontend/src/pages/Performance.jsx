@@ -55,14 +55,14 @@ export default function Performance() {
 
   useEffect(() => {
     api.v2Backtest()
-      .then(setData)
+      .then(d => { setData(d); setLoading(false); })
       .catch(() =>
         fetch('/data/backtest_v2_results.json')
           .then(r => { if (!r.ok) throw new Error('No data'); return r.json(); })
-          .then(setData)
+          .then(d => { setData(d); })
           .catch(e => setError(e.message))
-      )
-      .finally(() => setLoading(false));
+          .finally(() => setLoading(false))
+      );
   }, []);
 
   if (loading) return <LoadingSpinner label="Loading backtest results..." />;
