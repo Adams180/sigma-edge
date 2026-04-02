@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Cloud, Wind, Droplets, Thermometer, Eye, Sun, CloudRain, Snowflake, Zap, AlertTriangle, Filter } from 'lucide-react';
+import { DemoBadge } from '../components/ui/BackendStatus';
 import api from '../api';
 
 // Weather impact rules based on research into football + weather correlations
@@ -116,9 +117,12 @@ export default function WeatherEdge() {
           <Cloud size={24} className="inline mr-2 text-[var(--color-info)]" />
           Weather Edge
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-          Quantify how weather conditions shift win probability and Over/Under markets for upcoming matches.
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            Quantify how weather conditions shift win probability and Over/Under markets for upcoming matches.
+          </p>
+          <DemoBadge />
+        </div>
       </div>
 
       {/* KPIs */}

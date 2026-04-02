@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTeamLogos } from '../../contexts/TeamLogosContext';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 export { default as ProGate } from './ProGate';
+export { BackendLoading, BackendError, DemoBadge } from './BackendStatus';
 
 export function MetricCard({ label, value, change, changeLabel, icon: Icon, variant = 'default' }) {
   const isPositive = change > 0;

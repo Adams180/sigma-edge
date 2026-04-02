@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Trophy, Medal, TrendingUp, TrendingDown, Flame, Star, BarChart3, ArrowUpDown } from 'lucide-react';
+import { BackendLoading, BackendError, DemoBadge } from '../components/ui/BackendStatus';
 import api from '../api';
 
 const MOCK_TRADERS = [
@@ -79,9 +80,12 @@ export default function Leaderboard() {
             <Trophy size={24} className="inline mr-2 text-amber-400" />
             Sigma Leaderboard
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-            Track your model's performance against the community. Ranked by ROI.
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+              Track your model's performance against the community. Ranked by ROI.
+            </p>
+            <DemoBadge />
+          </div>
         </div>
         {myRank > 0 && (
           <div className="text-center">

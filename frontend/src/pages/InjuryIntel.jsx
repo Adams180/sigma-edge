@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, TrendingDown, TrendingUp, AlertTriangle, Search, Filter } from 'lucide-react';
+import { DemoBadge } from '../components/ui/BackendStatus';
 import api from '../api';
 
 // Injury impact data — realistic simulation based on position and player importance
@@ -80,9 +81,12 @@ export default function InjuryIntel() {
           <Users size={24} className="inline mr-2 text-[var(--color-danger)]" />
           Injury Intel
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-          Track player injuries and their quantified impact on match win probability.
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            Track player injuries and their quantified impact on match win probability.
+          </p>
+          <DemoBadge />
+        </div>
       </div>
 
       {/* KPI strip */}

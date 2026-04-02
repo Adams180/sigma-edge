@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, TrendingUp, TrendingDown, Flame, Calendar, BarChart3, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { DemoBadge } from '../components/ui/BackendStatus';
 import api from '../api';
 
 const MODEL_VARIANTS = [
@@ -109,9 +110,12 @@ export default function CopyTrading() {
             <Users size={24} className="inline mr-2 text-[var(--color-primary)]" />
             Copy Trading
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-            Follow a model strategy and auto-mirror its signals. Select a strategy that fits your risk profile.
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+              Follow a model strategy and auto-mirror its signals. Select a strategy that fits your risk profile.
+            </p>
+            <DemoBadge />
+          </div>
         </div>
         <div className="text-xs px-3 py-1.5 rounded-full" style={{ background: 'rgba(99,102,241,0.1)', color: 'var(--color-primary)', border: '1px solid rgba(99,102,241,0.3)' }}>
           {followed.size} strateg{followed.size === 1 ? 'y' : 'ies'} followed

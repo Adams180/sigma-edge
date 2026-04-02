@@ -1,22 +1,25 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link2, Filter, TrendingUp, AlertCircle } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 export default function CorrelatedParlayFinder() {
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [minCorr, setMinCorr] = useState(0.6);
   const [maxLegs, setMaxLegs] = useState(3);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const bt = await api.v2Backtest();
-        setBets(bt.bets || []);
-      } catch { setBets([]); }
-      setLoading(false);
-    })();
-  }, []);
+  const load = async () => {
+    setLoading(true); setError(null);
+    try {
+      const bt = await api.v2Backtest();
+      setBets(bt.bets || []);
+    } catch (err) { setError(err.message); setBets([]); }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const parlays = useMemo(() => {
     if (bets.length < 2) return [];
@@ -68,11 +71,8 @@ export default function CorrelatedParlayFinder() {
     return { legs, date, combinedOdds, avgEv, allWon, anyResult, score, legCount: legs.length };
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <BackendLoading label="Finding correlated parlays…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>

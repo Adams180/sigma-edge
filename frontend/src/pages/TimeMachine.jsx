@@ -1,32 +1,30 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Clock, ChevronLeft, ChevronRight, Calendar, TrendingUp, Target, BarChart3 } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 export default function TimeMachine() {
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [dates, setDates] = useState([]);
   const [dateIdx, setDateIdx] = useState(0);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const bt = await api.v2Backtest();
-        const allBets = bt.bets || [];
-        setBets(allBets);
+  const load = async () => {
+    setLoading(true); setError(null);
+    try {
+      const bt = await api.v2Backtest();
+      const allBets = bt.bets || [];
+      setBets(allBets);
+      const uniq = [...new Set(allBets.map(b => b.date || b.match_date || '').filter(Boolean))].sort().reverse();
+      setDates(uniq);
+      if (uniq.length) { setSelectedDate(uniq[0]); setDateIdx(0); }
+    } catch (err) { setError(err.message); setBets([]); }
+    setLoading(false);
+  };
 
-        // Extract unique dates
-        const uniq = [...new Set(allBets.map(b => b.date || b.match_date || '').filter(Boolean))].sort().reverse();
-        setDates(uniq);
-        if (uniq.length) {
-          setSelectedDate(uniq[0]);
-          setDateIdx(0);
-        }
-      } catch { setBets([]); }
-      setLoading(false);
-    })();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const navigate = (dir) => {
     const newIdx = dateIdx + dir;
@@ -49,11 +47,8 @@ export default function TimeMachine() {
     return { wins, losses, total: dayBets.length, hitRate: dayBets.length ? ((wins / dayBets.length) * 100).toFixed(0) : 0, avgEv: (totalEv * 100).toFixed(1), avgOdds: avgOdds.toFixed(2) };
   }, [dayBets]);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <BackendLoading label="Loading match history…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>

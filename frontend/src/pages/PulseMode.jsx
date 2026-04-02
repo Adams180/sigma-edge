@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Activity, Zap, TrendingUp, TrendingDown, Clock, Circle } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 function PulseCard({ match, status }) {
@@ -60,10 +61,12 @@ function PulseCard({ match, status }) {
 export default function PulseMode() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const intervalRef = useRef(null);
 
-  const fetchData = async () => {
+  const fetchData = async (isRetry = false) => {
+    if (isRetry) { setLoading(true); setError(null); }
     try {
       const [fixtures, bt] = await Promise.all([
         api.fixtures({ limit: 50 }).catch(() => ({ fixtures: [] })),
@@ -96,24 +99,21 @@ export default function PulseMode() {
       });
       setMatches(mapped);
       setLastUpdate(new Date());
-    } catch {}
+    } catch (err) { if (matches.length === 0) setError(err.message); }
     setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-    intervalRef.current = setInterval(fetchData, 30000); // refresh every 30s
+    intervalRef.current = setInterval(() => fetchData(), 30000);
     return () => clearInterval(intervalRef.current);
   }, []);
 
   const liveMatches = matches.filter(m => m.status === 'live');
   const upcomingMatches = matches.filter(m => m.status === 'upcoming');
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <BackendLoading label="Loading live match data…" />;
+  if (error) return <BackendError msg={error} onRetry={() => fetchData(true)} />;
 
   return (
     <div>

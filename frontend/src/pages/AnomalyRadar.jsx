@@ -1,49 +1,49 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight, Filter } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 export default function AnomalyRadar() {
   const [anomalies, setAnomalies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [minGap, setMinGap] = useState(5);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const bt = await api.v2Backtest();
-        const bets = bt.bets || [];
-        // Find bets where model probability diverges from implied odds probability
-        const found = bets.map(b => {
-          const impliedProb = b.odds ? (1 / b.odds) * 100 : 50;
-          const modelProb = b.ev ? (impliedProb + b.ev * 100) : impliedProb;
-          const gap = modelProb - impliedProb;
-          return {
-            match: `${b.home_team || 'Home'} vs ${b.away_team || 'Away'}`,
-            league: b.league || '—',
-            market: b.market || 'H2H',
-            odds: b.odds || 2.0,
-            impliedProb: impliedProb.toFixed(1),
-            modelProb: modelProb.toFixed(1),
-            gap: gap.toFixed(1),
-            absGap: Math.abs(gap),
-            direction: gap > 0 ? 'overvalued' : 'undervalued',
-            result: b.result,
-            ev: b.ev ? (b.ev * 100).toFixed(1) : '0',
-          };
-        })
-        .filter(a => a.absGap >= minGap)
-        .sort((a, b) => b.absGap - a.absGap);
-        setAnomalies(found);
-      } catch { setAnomalies([]); }
-      setLoading(false);
-    })();
-  }, [minGap]);
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const bt = await api.v2Backtest();
+      const bets = bt.bets || [];
+      const found = bets.map(b => {
+        const impliedProb = b.odds ? (1 / b.odds) * 100 : 50;
+        const modelProb = b.ev ? (impliedProb + b.ev * 100) : impliedProb;
+        const gap = modelProb - impliedProb;
+        return {
+          match: `${b.home_team || 'Home'} vs ${b.away_team || 'Away'}`,
+          league: b.league || '—',
+          market: b.market || 'H2H',
+          odds: b.odds || 2.0,
+          impliedProb: impliedProb.toFixed(1),
+          modelProb: modelProb.toFixed(1),
+          gap: gap.toFixed(1),
+          absGap: Math.abs(gap),
+          direction: gap > 0 ? 'overvalued' : 'undervalued',
+          result: b.result,
+          ev: b.ev ? (b.ev * 100).toFixed(1) : '0',
+        };
+      })
+      .filter(a => a.absGap >= minGap)
+      .sort((a, b) => b.absGap - a.absGap);
+      setAnomalies(found);
+    } catch (err) { setError(err.message); setAnomalies([]); }
+    setLoading(false);
+  };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  useEffect(() => { load(); }, [minGap]);
+
+  if (loading) return <BackendLoading label="Scanning for anomalies…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>

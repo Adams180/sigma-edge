@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Ghost, TrendingUp, TrendingDown, Eye, DollarSign, BarChart3, RefreshCw } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 const VIRTUAL_BANKROLL = 1000;
@@ -7,11 +8,12 @@ const VIRTUAL_BANKROLL = 1000;
 export default function GhostModel() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const bt = await api.v2Backtest();
+  const load = async () => {
+    setLoading(true); setError(null);
+    try {
+      const bt = await api.v2Backtest();
         // Simulate ghost model — same signals, but none actually placed
         const signals = bt.bets || [];
         let bank = VIRTUAL_BANKROLL;
@@ -49,16 +51,14 @@ export default function GhostModel() {
           totalSignals: signals.length,
           history: history.slice(-30), // last 30
         });
-      } catch { setData(null); }
+      } catch (err) { setError(err.message); setData(null); }
       setLoading(false);
-    })();
-  }, []);
+  };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <BackendLoading label="Running ghost simulation…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>

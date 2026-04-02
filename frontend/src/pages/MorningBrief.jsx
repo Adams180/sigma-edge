@@ -1,25 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Sunrise, Target, TrendingUp, Clock, Star, AlertTriangle } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 export default function MorningBrief() {
   const [fixtures, setFixtures] = useState([]);
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [fx, bt] = await Promise.all([
-          api.fixtures().catch(() => []),
-          api.v2Backtest().catch(() => ({ bets: [] })),
-        ]);
-        setFixtures(Array.isArray(fx) ? fx : []);
-        setBets(bt.bets || []);
-      } catch {}
-      setLoading(false);
-    })();
-  }, []);
+  const load = async () => {
+    setLoading(true); setError(null);
+    try {
+      const [fx, bt] = await Promise.all([
+        api.fixtures().catch(() => ({ fixtures: [] })),
+        api.v2Backtest(),
+      ]);
+      setFixtures(Array.isArray(fx) ? fx : (fx.fixtures || []));
+      setBets(bt.bets || []);
+    } catch (err) { setError(err.message); }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const hour = new Date().getHours();
@@ -42,11 +45,8 @@ export default function MorningBrief() {
     return fd.startsWith(todayDate);
   });
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <BackendLoading label="Preparing your morning brief…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>

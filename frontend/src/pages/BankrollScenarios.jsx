@@ -1,22 +1,25 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Sliders, DollarSign, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 export default function BankrollScenarios() {
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [startingBank, setStartingBank] = useState(1000);
   const [kellyFraction, setKellyFraction] = useState(0.02);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const bt = await api.v2Backtest();
-        setBets(bt.bets || []);
-      } catch { setBets([]); }
-      setLoading(false);
-    })();
-  }, []);
+  const load = async () => {
+    setLoading(true); setError(null);
+    try {
+      const bt = await api.v2Backtest();
+      setBets(bt.bets || []);
+    } catch (err) { setError(err.message); setBets([]); }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const simulation = useMemo(() => {
     let bank = startingBank;
@@ -59,11 +62,8 @@ export default function BankrollScenarios() {
     return `${x},${y}`;
   }).join(' ');
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <BackendLoading label="Simulating bankroll scenarios…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Shuffle, RefreshCw, ExternalLink, ArrowRight, TrendingUp, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { DemoBadge } from '../components/ui/BackendStatus';
 import api from '../api';
 
 // Bookmaker price simulation (normally you'd get real prices from multiple books)
@@ -103,9 +104,12 @@ export default function ArbitrageScanner() {
             <Shuffle size={24} className="inline mr-2 text-[var(--color-success)]" />
             Multi-Book Arbitrage Scanner
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-            Find risk-free profit opportunities by comparing prices across {BOOKS.length} bookmakers.
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+              Find risk-free profit opportunities by comparing prices across {BOOKS.length} bookmakers.
+            </p>
+            <DemoBadge />
+          </div>
         </div>
         <button onClick={scan} disabled={scanning}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"

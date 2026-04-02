@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Zap, Shield, Cloud, Users, TrendingUp } from 'lucide-react';
+import { BackendLoading, BackendError } from '../components/ui/BackendStatus';
 import api from '../api';
 
 export default function NarrativeEngine() {
   const [briefs, setBriefs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const bt = await api.v2Backtest();
-        const bets = bt.bets || [];
+  const load = async () => {
+    setLoading(true); setError(null);
+    try {
+      const bt = await api.v2Backtest();
+      const bets = bt.bets || [];
         // Generate narratives from actual signal data
         const generated = bets.slice(-12).reverse().map((b, i) => {
           const implied = b.odds ? (1 / b.odds * 100).toFixed(0) : '50';
@@ -36,16 +38,14 @@ export default function NarrativeEngine() {
           };
         });
         setBriefs(generated);
-      } catch { setBriefs([]); }
-      setLoading(false);
-    })();
-  }, []);
+    } catch (err) { setError(err.message); setBriefs([]); }
+    setLoading(false);
+  };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
-    </div>
-  );
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <BackendLoading label="Generating intelligence briefings…" />;
+  if (error) return <BackendError msg={error} onRetry={load} />;
 
   return (
     <div>
