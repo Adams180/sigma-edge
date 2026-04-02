@@ -24,7 +24,17 @@ export default function ValueScanner() {
     async function load() {
       try {
         const liveData = await api.v2Signals(bankroll);
-        setSignals(liveData.signals || []);
+        // Normalise field names from API → what the UI expects
+        const normalised = (liveData.signals || []).map(s => ({
+          ...s,
+          our_prob: s.calibrated_prob ?? s.our_prob ?? 0,
+          kelly_used: s.kelly_pct ?? s.kelly_used ?? 0,
+          stake_amount: s.stake_amount ?? 0,
+          market_prob: s.market_prob ?? 0,
+          edge: s.edge ?? s.ev ?? 0,
+          decimal_odds: s.decimal_odds ?? 1,
+        }));
+        setSignals(normalised);
         setTotalExposure(liveData.total_exposure_pct || 0);
         setIsLive(true);
       } catch {
@@ -40,10 +50,12 @@ export default function ValueScanner() {
             .map(s => ({
               ...s,
               match: s.match,
-              decimal_odds: s.odds,
-              our_prob: s.calibrated_prob,
-              kelly_used: s.kelly_pct,
-              stake_amount: s.stake,
+              decimal_odds: s.odds ?? s.decimal_odds ?? 1,
+              our_prob: s.calibrated_prob ?? s.our_prob ?? 0,
+              market_prob: s.market_prob ?? 0,
+              edge: s.edge ?? s.ev ?? 0,
+              kelly_used: s.kelly_pct ?? s.kelly_used ?? 0,
+              stake_amount: s.stake ?? s.stake_amount ?? 0,
               bookmaker: 'Historical',
             }));
           setSignals(recent);
@@ -96,7 +108,7 @@ export default function ValueScanner() {
               </div>
               <div className="h-4 w-px bg-border-subtle" />
               <span className="text-xs text-text-muted">
-                Best edge: <span className="text-primary font-bold">+{(Math.max(...signals.map(s => s.ev)) * 100).toFixed(1)}%</span>
+                Best edge: <span className="text-primary font-bold">+{(Math.max(...signals.map(s => s.ev || s.edge || 0)) * 100).toFixed(1)}%</span>
               </span>
             </div>
             {isLive && (
@@ -142,12 +154,12 @@ export default function ValueScanner() {
                 {/* Stats grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                   {[
-                    { label: 'Model Probability', value: `${(s.our_prob * 100).toFixed(1)}%`, color: 'text-primary', highlight: true },
-                    { label: 'Market Implied', value: `${(s.market_prob * 100).toFixed(1)}%`, color: 'text-text-primary' },
-                    { label: 'Decimal Odds', value: s.decimal_odds.toFixed(2), color: 'text-text-primary' },
-                    { label: 'Edge', value: `+${(s.edge * 100).toFixed(1)}%`, color: 'text-accent-light' },
-                    { label: 'Kelly Fraction', value: `${(s.kelly_used * 100).toFixed(2)}%`, color: 'text-warning' },
-                    { label: 'Recommended Stake', value: `$${s.stake_amount.toFixed(0)}`, color: 'text-primary', highlight: true },
+                    { label: 'Model Probability', value: `${((s.our_prob || 0) * 100).toFixed(1)}%`, color: 'text-primary', highlight: true },
+                    { label: 'Market Implied', value: `${((s.market_prob || 0) * 100).toFixed(1)}%`, color: 'text-text-primary' },
+                    { label: 'Decimal Odds', value: (s.decimal_odds || 0).toFixed(2), color: 'text-text-primary' },
+                    { label: 'Edge', value: `+${((s.edge || 0) * 100).toFixed(1)}%`, color: 'text-accent-light' },
+                    { label: 'Kelly Fraction', value: `${((s.kelly_used || 0) * 100).toFixed(2)}%`, color: 'text-warning' },
+                    { label: 'Recommended Stake', value: `$${(s.stake_amount || 0).toFixed(0)}`, color: 'text-primary', highlight: true },
                   ].map((stat) => (
                     <div key={stat.label} className={`p-3 rounded-xl ${stat.highlight ? 'bg-bg-hover' : ''}`}>
                       <div className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">{stat.label}</div>
