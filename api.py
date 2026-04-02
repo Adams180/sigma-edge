@@ -23,6 +23,7 @@ from database import get_conn, init_db
 from inefficiency_scanner import InefficiencyScanner
 from probability_engine import ProbabilityEngine
 from billing import router as billing_router
+from scheduler import start_scheduler, stop_scheduler, scheduler_status
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,6 +57,12 @@ app.include_router(billing_router)
 def _startup() -> None:
     init_db()
     log.info("Database ready.")
+    start_scheduler()
+
+
+@app.on_event("shutdown")
+def _shutdown() -> None:
+    stop_scheduler()
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -355,7 +362,34 @@ def fixture_detail(fixture_id: int):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
+    with get_conn() as conn:
+        fixture_count  = conn.execute("SELECT COUNT(*) AS n FROM fixtures").fetchone()["n"]
+        ft_count       = conn.execute("SELECT COUNT(*) AS n FROM fixtures WHERE status='FT'").fetchone()["n"]
+        upcoming_count = conn.execute("SELECT COUNT(*) AS n FROM fixtures WHERE status='NS'").fetchone()["n"]
+        odds_count     = conn.execute("SELECT COUNT(*) AS n FROM odds_snapshots").fetchone()["n"]
+    return {
+        "status": "ok",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "db": {
+            "total_fixtures": fixture_count,
+            "finished": ft_count,
+            "upcoming": upcoming_count,
+            "odds_snapshots": odds_count,
+        },
+        "scheduler": scheduler_status(),
+    }
+
+
+@app.post("/api/admin/refresh")
+def admin_refresh():
+    """Manually trigger a data refresh (upcoming fixtures + odds)."""
+    from ingest_upcoming import ingest_upcoming
+    try:
+        n = ingest_upcoming()
+        return {"ok": True, "fixtures_refreshed": n}
+    except Exception as exc:
+        log.exception("Manual refresh failed")
+        return {"ok": False, "error": str(exc)}
 
 
 # ──────────────────────────────────────────────────────────────────────────
