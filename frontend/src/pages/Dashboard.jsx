@@ -102,7 +102,7 @@ export default function Dashboard() {
               Full Report <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="h-48">
+          <div className="h-48 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={sparkData}>
                 <defs>

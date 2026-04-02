@@ -47,16 +47,22 @@ async def create_checkout(req: CheckoutRequest):
     price_id = PRICE_IDS[req.tier]
     if not price_id:
         raise HTTPException(503, f"Stripe price ID for '{req.tier}' not configured")
+    if not stripe.api_key:
+        raise HTTPException(503, "Stripe not configured on this server")
 
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="subscription",
-        customer_email=req.email,
-        line_items=[{"price": price_id, "quantity": 1}],
-        success_url=req.success_url,
-        cancel_url=req.cancel_url,
-        metadata={"user_id": req.user_id, "tier": req.tier},
-    )
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="subscription",
+            customer_email=req.email,
+            line_items=[{"price": price_id, "quantity": 1}],
+            success_url=req.success_url,
+            cancel_url=req.cancel_url,
+            metadata={"user_id": req.user_id, "tier": req.tier},
+        )
+    except stripe.error.StripeError as exc:
+        log.error("Stripe error: %s", exc)
+        raise HTTPException(502, f"Stripe error: {exc.user_message or str(exc)}")
     return {"url": session.url}
 
 

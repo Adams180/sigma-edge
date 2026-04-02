@@ -133,7 +133,7 @@ export default function Performance() {
       <div className="stripe-card p-6 mb-6">
         <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Bankroll Curve</h2>
         <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>$1,000 starting bankroll — fractional Kelly staking</p>
-        <div className="h-72">
+        <div className="h-72 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={bankrollData} margin={{ top: 5, right: 20, bottom: 5, left: 10 }}>
               <defs>
@@ -163,7 +163,7 @@ export default function Performance() {
         <div className="stripe-card p-6">
           <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Monthly P&L</h2>
           <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>Net profit/loss per calendar month</p>
-          <div className="h-56">
+          <div className="h-56 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData} margin={{ top: 5, right: 10, bottom: 5, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />

@@ -9,7 +9,7 @@ async function fetchProfile(userId) {
       .from('profiles')
       .select('tier, bankroll, subscription_status')
       .eq('id', userId)
-      .single();
+      .maybeSingle();   // returns null (not 406) when table is empty or row missing
     return data ?? null;
   } catch {
     return null;
