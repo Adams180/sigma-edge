@@ -17,6 +17,7 @@ import {
   Rocket,
   CheckCircle2,
   Circle,
+  Flame,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis } from 'recharts';
@@ -56,6 +57,17 @@ export default function Dashboard() {
   const signals = data?.signals || [];
   const recentSignals = signals.slice(-20).reverse();
   const leagueStats = data?.league_stats || {};
+
+  // Current win streak from bets
+  const bets = data?.bets || signals;
+  let currentStreak = 0;
+  let streakType = 'W';
+  for (let i = bets.length - 1; i >= 0; i--) {
+    const r = bets[i]?.result;
+    if (i === bets.length - 1) { streakType = r === 'Win' ? 'W' : 'L'; }
+    if ((streakType === 'W' && r === 'Win') || (streakType === 'L' && r !== 'Win')) currentStreak++;
+    else break;
+  }
 
   const email = user?.email || '';
   const name = email.split('@')[0] || 'User';
@@ -195,6 +207,44 @@ export default function Dashboard() {
             <TrendingDown size={14} />
             <span>{s ? s.sharpe_ratio.toFixed(3) : '—'}</span>
             <span className="fs-delta-label">Sharpe Ratio</span>
+          </div>
+        </div>
+
+        {/* Streak Flames */}
+        <div className="fs-kpi-card" style={{ position: 'relative', overflow: 'hidden' }}>
+          {currentStreak >= 3 && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: streakType === 'W'
+                ? 'radial-gradient(circle at 70% 50%, rgba(239,68,68,0.08) 0%, transparent 70%)'
+                : 'radial-gradient(circle at 70% 50%, rgba(99,102,241,0.06) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+          )}
+          <div className="fs-kpi-header">
+            <span className="fs-kpi-label">Current Streak</span>
+            <button className="fs-kpi-menu"><MoreHorizontal size={16} /></button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+            <p className="fs-kpi-value" style={{ margin: 0, color: currentStreak >= 5 ? '#ef4444' : currentStreak >= 3 ? '#f97316' : 'var(--color-text-primary)' }}>
+              {loading ? '...' : currentStreak > 0 ? `${currentStreak}${streakType}` : '—'}
+            </p>
+            {!loading && currentStreak >= 3 && (
+              <div style={{ display: 'flex' }}>
+                {Array.from({ length: Math.min(currentStreak, 5) }).map((_, i) => (
+                  <Flame key={i} size={i < 2 ? 18 : 22} style={{
+                    color: i < currentStreak - 2 ? '#ef4444' : '#f97316',
+                    marginLeft: i > 0 ? -4 : 0,
+                    opacity: 0.7 + i * 0.06,
+                  }} />
+                ))}
+              </div>
+            )}
+          </div>
+          <div className={`fs-kpi-delta ${streakType === 'W' ? 'positive' : 'negative'}`}>
+            {streakType === 'W' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+            <span>{currentStreak >= 5 ? 'On fire!' : currentStreak >= 3 ? 'Hot streak' : currentStreak > 0 ? `${currentStreak} in a row` : 'No streak'}</span>
+            <span className="fs-delta-label">{streakType === 'W' ? 'win streak' : 'loss streak'}</span>
           </div>
         </div>
       </div>

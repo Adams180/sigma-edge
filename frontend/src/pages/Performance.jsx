@@ -3,7 +3,7 @@ import { MetricCard, PageHeader, LoadingSpinner } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
 import {
   TrendingUp, Target, BarChart3, Activity, Percent, Award,
-  ChevronDown, ChevronUp, Zap, AlertTriangle
+  ChevronDown, ChevronUp, Zap, AlertTriangle, Download, FileText
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -285,6 +285,75 @@ export default function Performance() {
         )}
       </div>
 
+      {/* Sharpe Deep-Dive + Tax Export Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Sharpe Ratio breakdown */}
+        <div className="stripe-card p-6">
+          <h2 className="text-lg font-semibold text-text-primary mb-1">Sharpe Ratio Tracker</h2>
+          <p className="text-xs text-text-muted mb-4">Risk-adjusted return relative to a 0% risk-free rate</p>
+          <div className="space-y-3">
+            {[
+              { label: 'Overall Sharpe', value: s.sharpe_ratio?.toFixed(3) ?? '—', desc: 'Full backtest period', color: s.sharpe_ratio > 1.5 ? 'var(--color-success)' : s.sharpe_ratio > 0.8 ? 'var(--color-warning)' : 'var(--color-danger)' },
+              { label: 'ROI', value: `${s.roi_pct?.toFixed(1)}%`, desc: 'Total return on staked capital', color: s.roi_pct >= 0 ? 'var(--color-success)' : 'var(--color-danger)' },
+              { label: 'Max Drawdown', value: `${s.max_drawdown_pct?.toFixed(1)}%`, desc: 'Peak-to-trough loss', color: 'var(--color-warning)' },
+              { label: 'Recovery Factor', value: s.max_drawdown_pct > 0 ? (s.roi_pct / s.max_drawdown_pct).toFixed(2) : '—', desc: 'ROI ÷ Max Drawdown', color: 'var(--color-info)' },
+              { label: 'Win / Loss Ratio', value: s.wins && s.losses ? (s.wins / Math.max(1, s.losses)).toFixed(2) : '—', desc: 'Wins per loss', color: 'var(--color-text-secondary)' },
+            ].map(row => (
+              <div key={row.label} className="flex items-center justify-between py-2 border-b border-border-subtle/50 last:border-0">
+                <div>
+                  <div className="text-sm font-medium text-text-primary">{row.label}</div>
+                  <div className="text-xs text-text-muted">{row.desc}</div>
+                </div>
+                <span className="text-lg font-bold" style={{ color: row.color }}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+          {/* Sharpe rating */}
+          <div className="mt-4 p-3 rounded-xl" style={{ background: 'var(--color-bg-elevated)' }}>
+            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-muted)' }}>Rating: </span>
+            <span className="text-sm font-bold" style={{ color: s.sharpe_ratio > 2 ? 'var(--color-success)' : s.sharpe_ratio > 1 ? 'var(--color-warning)' : 'var(--color-danger)' }}>
+              {s.sharpe_ratio > 2 ? '🏆 Excellent (>2.0)' : s.sharpe_ratio > 1.5 ? '⚡ Very Good (>1.5)' : s.sharpe_ratio > 1 ? '📊 Acceptable (>1.0)' : '⚠️ Below Target (<1.0)'}
+            </span>
+          </div>
+        </div>
+
+        {/* Tax Export */}
+        <div className="stripe-card p-6">
+          <h2 className="text-lg font-semibold text-text-primary mb-1">
+            <FileText size={18} className="inline mr-2" />
+            Tax Report Export
+          </h2>
+          <p className="text-xs text-text-muted mb-4">Export your P&L records for tax reporting. CSV format compatible with most accounting software.</p>
+          <div className="space-y-3 mb-5">
+            {[
+              { label: 'Total Gross Profit', value: `$${Math.max(0, s.total_pnl).toFixed(2)}` },
+              { label: 'Total Gross Loss', value: `$${Math.abs(Math.min(0, s.total_pnl)).toFixed(2)}` },
+              { label: 'Net P&L', value: formatMoney(s.total_pnl), positive: s.total_pnl >= 0 },
+              { label: 'Period', value: `${data.period?.start ?? '—'} → ${data.period?.end ?? '—'}` },
+              { label: 'Total Transactions', value: s.total_signals },
+            ].map(row => (
+              <div key={row.label} className="flex justify-between py-1.5 border-b border-border-subtle/50 last:border-0">
+                <span className="text-xs text-text-muted">{row.label}</span>
+                <span className={`text-sm font-semibold ${row.positive === true ? 'text-success' : row.positive === false ? 'text-danger' : 'text-text-primary'}`}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <button onClick={() => exportCSV(data)} className="flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl text-sm font-semibold"
+              style={{ background: 'var(--color-primary)', color: '#fff' }}>
+              <Download size={16} /> Download CSV Report
+            </button>
+            <button onClick={() => exportJSON(data)} className="flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl text-sm font-medium"
+              style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+              <Download size={16} /> Download JSON (Full Data)
+            </button>
+          </div>
+          <p className="text-[10px] mt-3" style={{ color: 'var(--color-text-muted)' }}>
+            Consult a qualified accountant for tax advice. This report is informational only.
+          </p>
+        </div>
+      </div>
+
       {/* Model Info Footer */}
       <div className="stripe-card p-4 text-center">
         <p className="text-xs text-text-muted">
@@ -294,4 +363,51 @@ export default function Performance() {
       </div>
     </div>
   );
+}
+
+function exportCSV(data) {
+  const s = data.summary;
+  const rows = [
+    ['Sigma Edge — Performance Export'],
+    ['Generated', new Date().toISOString()],
+    ['Period', `${data.period?.start} to ${data.period?.end}`],
+    [],
+    ['METRIC', 'VALUE'],
+    ['Total Signals', s.total_signals],
+    ['Wins', s.wins],
+    ['Losses', s.losses],
+    ['Hit Rate %', (s.hit_rate * 100).toFixed(2)],
+    ['ROI %', s.roi_pct?.toFixed(2)],
+    ['Total P&L ($)', s.total_pnl?.toFixed(2)],
+    ['Total Staked ($)', s.total_staked?.toFixed(2)],
+    ['Sharpe Ratio', s.sharpe_ratio?.toFixed(3)],
+    ['Max Drawdown %', s.max_drawdown_pct?.toFixed(2)],
+    ['Final Bankroll ($)', s.final_bankroll?.toFixed(2)],
+    ['Best Win Streak', s.best_streak],
+    ['Worst Loss Streak', s.worst_streak],
+    [],
+    ['LEAGUE BREAKDOWN'],
+    ['League', 'Signals', 'Hit Rate %', 'ROI %', 'P&L ($)'],
+    ...Object.entries(data.league_stats || {}).map(([name, st]) => [
+      name, st.signals, (st.hit_rate * 100).toFixed(1), st.roi_pct?.toFixed(2), st.pnl?.toFixed(2)
+    ]),
+  ];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sigma-edge-performance-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON(data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sigma-edge-backtest-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 }

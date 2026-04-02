@@ -21,6 +21,12 @@ import SmartAlerts from './pages/SmartAlerts';
 import TimeMachine from './pages/TimeMachine';
 import NarrativeEngine from './pages/NarrativeEngine';
 import MorningBrief from './pages/MorningBrief';
+import Leaderboard from './pages/Leaderboard';
+import ArbitrageScanner from './pages/ArbitrageScanner';
+import CopyTrading from './pages/CopyTrading';
+import DailyChallenge from './pages/DailyChallenge';
+import InjuryIntel from './pages/InjuryIntel';
+import WeatherEdge from './pages/WeatherEdge';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 import SettingsPage from './pages/SettingsPage';
@@ -32,7 +38,7 @@ function ProtectedRoute({ children }) {
       <div className="w-8 h-8 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
     </div>
   );
-  // if (!user) return <Navigate to="/login" replace />; // temp bypass
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -64,6 +70,12 @@ function AppLayout() {
               <Route path="/time-machine" element={<TimeMachine />} />
               <Route path="/narrative" element={<NarrativeEngine />} />
               <Route path="/morning-brief" element={<MorningBrief />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/arbitrage" element={<ArbitrageScanner />} />
+              <Route path="/copy-trading" element={<CopyTrading />} />
+              <Route path="/challenge" element={<DailyChallenge />} />
+              <Route path="/injury" element={<InjuryIntel />} />
+              <Route path="/weather" element={<WeatherEdge />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

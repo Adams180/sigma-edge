@@ -26,6 +26,13 @@ import {
   Clock,
   BookOpen,
   Coffee,
+  Trophy,
+  Shuffle,
+  Copy,
+  Target,
+  Syringe,
+  CloudRain,
+  Flame,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -48,6 +55,7 @@ const NAV_SECTIONS = [
       { path: '/live', label: 'Live Feed', icon: Radio },
       { path: '/performance', label: 'Performance', icon: BarChart3 },
       { path: '/bankroll', label: 'Bankroll Scenarios', icon: DollarSign },
+      { path: '/arbitrage', label: 'Arb Scanner', icon: Shuffle },
     ],
   },
   {
@@ -58,8 +66,18 @@ const NAV_SECTIONS = [
       { path: '/parlay', label: 'Parlay Finder', icon: GitMerge },
       { path: '/ghost', label: 'Ghost Model', icon: Ghost },
       { path: '/time-machine', label: 'Time Machine', icon: Clock },
+      { path: '/injury', label: 'Injury Intel', icon: Syringe },
+      { path: '/weather', label: 'Weather Edge', icon: CloudRain },
       { path: '/referees', label: 'Referee Intel', icon: Shield },
       { path: '/lineups', label: 'Lineup Monitor', icon: Users },
+    ],
+  },
+  {
+    title: 'COMMUNITY',
+    items: [
+      { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+      { path: '/copy-trading', label: 'Copy Trading', icon: Copy },
+      { path: '/challenge', label: 'Daily Challenge', icon: Flame },
     ],
   },
   {
