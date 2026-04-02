@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader, LeagueBadge, StatusBadge, ProbabilityBar } from '../components/ui';
 import { Users, UserX, Info, Lock, TrendingDown } from 'lucide-react';
+import api from '../api';
 
-// Demo data showing what the feature looks like with live API connected
 const DEMO_ALERTS = [
   {
     id: 1,
@@ -12,7 +12,7 @@ const DEMO_ALERTS = [
     missing_players: ['Bukayo Saka', 'Martin Ødegaard'],
     prob_dock: 0.082,
     probs: { home: 0.41, draw: 0.30, away: 0.29 },
-    original_probs: { home: 0.52, draw: 0.26, away: 0.22 },
+    original_probs: null,
     reason: 'Injury — hamstring',
   },
   {
@@ -51,9 +51,36 @@ const DEMO_ALERTS = [
 ];
 
 export default function LineupAlerts() {
+  const [alerts, setAlerts] = useState(null); // null = not yet loaded
   const [filter, setFilter] = useState('all');
-  const leagues = [...new Set(DEMO_ALERTS.map(a => a.league))];
-  const filtered = DEMO_ALERTS.filter(a => filter === 'all' || a.league === filter);
+
+  useEffect(() => {
+    api.lineupAlerts()
+      .then(d => {
+        const live = (d.alerts || []).map((a, i) => ({
+          id: a.fixture_id || i,
+          league: a.league,
+          match: a.match,
+          team: a.team,
+          missing_players: a.missing_players || [],
+          prob_dock: (a.prob_dock_pct || 0) / 100,
+          probs: {
+            home: a.probabilities?.home_win || 0,
+            draw: a.probabilities?.draw || 0,
+            away: a.probabilities?.away_win || 0,
+          },
+          original_probs: null,
+          reason: `${a.count_missing} key player${a.count_missing !== 1 ? 's' : ''} missing`,
+        }));
+        setAlerts(live.length > 0 ? live : DEMO_ALERTS);
+      })
+      .catch(() => setAlerts(DEMO_ALERTS));
+  }, []);
+
+  const displayAlerts = alerts ?? DEMO_ALERTS;
+  const isLive = alerts !== null && alerts !== DEMO_ALERTS;
+  const leagues = [...new Set(displayAlerts.map(a => a.league))];
+  const filtered = displayAlerts.filter(a => filter === 'all' || a.league === filter);
 
   return (
     <div>
@@ -64,13 +91,14 @@ export default function LineupAlerts() {
         </div>
       </PageHeader>
 
-      {/* Preview banner */}
+      {/* Banner — live or preview */}
       <div className="stripe-card p-4 mb-6 flex items-start gap-3 border-l-2 border-l-orange-500/50">
         <Info size={16} className="text-orange-400 mt-0.5 shrink-0" />
         <div className="text-xs text-text-secondary leading-relaxed">
-          <span className="font-semibold text-text-primary">Feature Preview</span> — These are sample alerts showing how the monitor works.
-          Connect <span className="text-primary font-semibold">API-Football</span> to receive real-time lineup alerts before kickoff. 
-          The model adjusts win probabilities when key players are missing.
+          {isLive
+            ? <><span className="font-semibold text-text-primary">Live lineup alerts</span> — real player absences detected for upcoming fixtures. Model adjusts win probabilities automatically.</>
+            : <><span className="font-semibold text-text-primary">Sample alerts</span> — showing demo data. Connect <span className="text-primary font-semibold">API-Football</span> to receive real-time lineup alerts before kickoff.</>
+          }
         </div>
       </div>
 
@@ -126,20 +154,22 @@ export default function LineupAlerts() {
             </div>
 
             {/* Probability Comparison */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-bg-hover">
-                <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider block mb-3">
-                  Original Probabilities
-                </span>
-                <ProbabilityBar
-                  home={a.original_probs.home}
-                  draw={a.original_probs.draw}
-                  away={a.original_probs.away}
-                />
-              </div>
+            <div className={`grid grid-cols-1 ${a.original_probs ? 'md:grid-cols-2' : ''} gap-4`}>
+              {a.original_probs && (
+                <div className="p-4 rounded-xl bg-bg-hover">
+                  <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider block mb-3">
+                    Original Probabilities
+                  </span>
+                  <ProbabilityBar
+                    home={a.original_probs.home}
+                    draw={a.original_probs.draw}
+                    away={a.original_probs.away}
+                  />
+                </div>
+              )}
               <div className="p-4 rounded-xl bg-bg-hover border border-red-500/10">
                 <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider block mb-3">
-                  Adjusted (without {a.missing_players.length > 1 ? 'key players' : a.missing_players[0]})
+                  {a.original_probs ? `Adjusted (without ${a.missing_players.length > 1 ? 'key players' : a.missing_players[0]})` : 'Current Win Probabilities'}
                 </span>
                 <ProbabilityBar
                   home={a.probs.home}

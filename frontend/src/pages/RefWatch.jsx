@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader, EmptyState, LeagueBadge } from '../components/ui';
 import { Shield, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import api from '../api';
 
 // Referee profiles extracted from historical CSV data (real referees, real averages)
 const REFEREE_PROFILES = [
@@ -28,13 +29,36 @@ function threatLevel(avg) {
 }
 
 export default function RefWatch() {
+  const [liveMatches, setLiveMatches] = useState(null); // null = loading, [] = empty
   const [leagueFilter, setLeagueFilter] = useState('all');
   const [sortBy, setSortBy] = useState('avg_yellows');
   const [sortDir, setSortDir] = useState('desc');
 
-  const leagues = [...new Set(REFEREE_PROFILES.map(r => r.league))];
+  useEffect(() => {
+    api.refWatch()
+      .then(d => setLiveMatches(d.matches || []))
+      .catch(() => setLiveMatches([]));
+  }, []);
 
-  const filtered = REFEREE_PROFILES
+  // Normalize live match data to same shape as REFEREE_PROFILES for unified rendering
+  const profiles = liveMatches && liveMatches.length > 0
+    ? liveMatches.map(m => ({
+        name: m.referee?.name || 'Unknown',
+        league: m.league,
+        matches: m.referee?.matches || 0,
+        avg_yellows: m.referee?.avg_yellows || 0,
+        avg_reds: m.referee?.avg_reds || 0,
+        avg_fouls: null,
+        match: m.match,
+        kickoff: m.kickoff,
+        cards_over_prob: m.model_cards?.over_3_5_prob || null,
+      }))
+    : REFEREE_PROFILES;
+
+  const isLive = liveMatches !== null && liveMatches.length > 0;
+  const leagues = [...new Set(profiles.map(r => r.league))];
+
+  const filtered = profiles
     .filter(r => leagueFilter === 'all' || r.league === leagueFilter)
     .sort((a, b) => sortDir === 'desc' ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy]);
 
@@ -60,8 +84,10 @@ export default function RefWatch() {
       <div className="stripe-card p-4 mb-6 flex items-start gap-3 border-l-2 border-l-primary/50">
         <Info size={16} className="text-primary mt-0.5 shrink-0" />
         <div className="text-xs text-text-secondary leading-relaxed">
-          <span className="font-semibold text-text-primary">Historical referee profiles</span> built from CSV match data. 
-          Connect <span className="text-primary font-semibold">API-Football</span> to get live referee assignments for upcoming fixtures and real-time card predictions.
+          {isLive
+            ? <><span className="font-semibold text-text-primary">Live referee assignments</span> — upcoming fixtures with assigned referee card profiles and model card predictions.</>
+            : <><span className="font-semibold text-text-primary">Historical referee profiles</span> built from CSV match data. Connect <span className="text-primary font-semibold">API-Football</span> to get live referee assignments for upcoming fixtures.</>
+          }
         </div>
       </div>
 
@@ -86,6 +112,7 @@ export default function RefWatch() {
             <thead>
               <tr className="border-b border-border-subtle">
                 <th className="text-left p-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Referee</th>
+                {isLive && <th className="text-left p-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Match</th>}
                 <th className="text-left p-4 text-xs font-semibold text-text-muted uppercase tracking-wider">League</th>
                 <th className="text-center p-4 text-xs font-semibold text-text-muted uppercase tracking-wider cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('matches')}>
                   <span className="inline-flex items-center gap-1">Matches <SortIcon col="matches" /></span>
@@ -96,9 +123,14 @@ export default function RefWatch() {
                 <th className="text-center p-4 text-xs font-semibold text-text-muted uppercase tracking-wider cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('avg_reds')}>
                   <span className="inline-flex items-center gap-1">Avg Reds <SortIcon col="avg_reds" /></span>
                 </th>
-                <th className="text-center p-4 text-xs font-semibold text-text-muted uppercase tracking-wider cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('avg_fouls')}>
-                  <span className="inline-flex items-center gap-1">Avg Fouls <SortIcon col="avg_fouls" /></span>
-                </th>
+                {!isLive && (
+                  <th className="text-center p-4 text-xs font-semibold text-text-muted uppercase tracking-wider cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('avg_fouls')}>
+                    <span className="inline-flex items-center gap-1">Avg Fouls <SortIcon col="avg_fouls" /></span>
+                  </th>
+                )}
+                {isLive && (
+                  <th className="text-center p-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Cards O/U 3.5</th>
+                )}
                 <th className="text-center p-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Threat</th>
               </tr>
             </thead>
@@ -106,13 +138,16 @@ export default function RefWatch() {
               {filtered.map((r) => {
                 const t = threatLevel(r.avg_yellows);
                 return (
-                  <tr key={r.name} className="border-b border-border-subtle/50 hover:bg-bg-hover/50 transition-colors">
+                  <tr key={`${r.name}-${r.match || r.league}`} className="border-b border-border-subtle/50 hover:bg-bg-hover/50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <Shield size={14} className="text-accent-light" />
                         <span className="font-semibold text-text-primary">{r.name}</span>
                       </div>
                     </td>
+                    {isLive && (
+                      <td className="p-4 text-text-secondary text-xs">{r.match || '—'}</td>
+                    )}
                     <td className="p-4"><LeagueBadge league={r.league} /></td>
                     <td className="p-4 text-center text-text-secondary font-medium">{r.matches}</td>
                     <td className="p-4 text-center">
@@ -125,7 +160,19 @@ export default function RefWatch() {
                         {r.avg_reds.toFixed(2)}
                       </span>
                     </td>
-                    <td className="p-4 text-center text-text-secondary font-medium">{r.avg_fouls.toFixed(1)}</td>
+                    {!isLive && (
+                      <td className="p-4 text-center text-text-secondary font-medium">{r.avg_fouls != null ? r.avg_fouls.toFixed(1) : '—'}</td>
+                    )}
+                    {isLive && (
+                      <td className="p-4 text-center">
+                        {r.cards_over_prob != null
+                          ? <span className={`font-bold ${r.cards_over_prob >= 0.6 ? 'text-red-400' : r.cards_over_prob >= 0.45 ? 'text-orange-400' : 'text-green-400'}`}>
+                              {(r.cards_over_prob * 100).toFixed(0)}%
+                            </span>
+                          : <span className="text-text-muted">—</span>
+                        }
+                      </td>
+                    )}
                     <td className="p-4 text-center">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${t.bg} ${t.color} border ${t.border}`}>
                         {t.label}

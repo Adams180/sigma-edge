@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, StatusBadge } from '../components/ui';
 import { Radio, Calendar, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Target } from 'lucide-react';
+import api from '../api';
 
 const LEAGUE_COLORS = {
   'Premier League': 'from-purple-500/20 to-purple-600/5',
@@ -16,13 +17,14 @@ export default function LiveFeed() {
   const [sortOrder, setSortOrder] = useState('desc');
 
   useEffect(() => {
-    fetch('/data/backtest_v2_results.json')
-      .then(r => r.json())
-      .then(d => {
-        setSignals(d.signals || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    api.v2Backtest()
+      .then(d => { setSignals(d.signals || []); setLoading(false); })
+      .catch(() =>
+        fetch('/data/backtest_v2_results.json')
+          .then(r => r.json())
+          .then(d => { setSignals(d.signals || []); setLoading(false); })
+          .catch(() => setLoading(false))
+      );
   }, []);
 
   const filtered = signals
