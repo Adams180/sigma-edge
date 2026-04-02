@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Sidebar from './components/layout/Sidebar';
+import TopBar from './components/layout/TopBar';
 import Dashboard from './pages/Dashboard';
 import ValueScanner from './pages/ValueScanner';
 import SignalHistory from './pages/SignalHistory';
@@ -25,24 +25,27 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout() {
-  const [collapsed, setCollapsed] = useState(false);
-
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-base)' }}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
-        <div className="max-w-[1400px] mx-auto p-6 lg:p-8">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/scanner" element={<ValueScanner />} />
-            <Route path="/signals" element={<SignalHistory />} />
-            <Route path="/live" element={<LiveFeed />} />
-            <Route path="/referees" element={<RefWatch />} />
-            <Route path="/lineups" element={<LineupAlerts />} />
-            <Route path="/performance" element={<Performance />} />              <Route path="/settings" element={<SettingsPage />} />            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </main>
+      <Sidebar />
+      <div className="flex-1 flex flex-col ml-[220px]">
+        <TopBar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-[1400px] mx-auto p-6 lg:p-8 flex flex-col gap-5">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/scanner" element={<ValueScanner />} />
+              <Route path="/signals" element={<SignalHistory />} />
+              <Route path="/live" element={<LiveFeed />} />
+              <Route path="/referees" element={<RefWatch />} />
+              <Route path="/lineups" element={<LineupAlerts />} />
+              <Route path="/performance" element={<Performance />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

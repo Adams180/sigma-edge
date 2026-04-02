@@ -36,3 +36,5 @@ export const api = {
   v2Backtest: () =>
     fetchJSON(`${BASE}/v2/backtest`),
 };
+
+export default api;
