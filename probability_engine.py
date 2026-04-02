@@ -1,3 +1,15 @@
+from __future__ import annotations
+
+import logging
+import math
+from dataclasses import dataclass, field
+from typing import Sequence
+
+from database import get_conn
+
+log = logging.getLogger(__name__)
+
+
 class PlayerValueEngine:
     """
     Computes injury impact and lambda adjustment for missing players.
@@ -106,29 +118,7 @@ def predict_cards(team_id: int, season: int) -> float:
         reds = [r["red_cards"] for r in rows]
         pct = sum(1 for r in reds if r and r > 0) / len(reds)
         return 1.5 if pct > 0.2 else 1.0
-"""
-ProbabilityEngine — Log-Space Bayesian Update Framework.
 
-All updates are performed in log-space to avoid floating-point underflow:
-
-    log P(H|D) = log P(H) + log P(D|H) − log Z
-
-Models implemented:
-    1. Poisson Model         — corners / goals λ from last 10 games
-    2. Referee-Weighted Card — adjusted card probs using referee averages
-    3. Injury Impact Signal  — key-player absence docks win prior by 5.4 %
-"""
-
-from __future__ import annotations
-
-import logging
-import math
-from dataclasses import dataclass, field
-from typing import Sequence
-
-from database import get_conn
-
-log = logging.getLogger(__name__)
 
 # ──────────────────────────────────────────────────────────────────────────
 #  Constants
