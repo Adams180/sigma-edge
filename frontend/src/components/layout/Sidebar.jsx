@@ -16,6 +16,7 @@ import {
   HelpCircle,
   ChevronsLeft,
   ChevronsRight,
+  CalendarDays,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -25,6 +26,7 @@ const NAV_SECTIONS = [
     title: 'GENERAL',
     items: [
       { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { path: '/fixtures', label: 'Fixtures', icon: CalendarDays },
     ],
   },
   {

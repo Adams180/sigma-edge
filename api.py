@@ -108,6 +108,95 @@ def upcoming_fixtures(limit: int = Query(50, ge=1, le=200)):
 
 
 # ──────────────────────────────────────────────────────────────────────────
+#  1b. Fixtures — all fixtures with league/status/date filters
+# ──────────────────────────────────────────────────────────────────────────
+
+@app.get("/api/fixtures")
+def all_fixtures(
+    league_id: int | None = Query(None),
+    status: str | None = Query(None, description="NS, LIVE, FT, or 'upcoming' for NS+LIVE"),
+    date_from: str | None = Query(None, description="ISO date YYYY-MM-DD"),
+    date_to: str | None = Query(None, description="ISO date YYYY-MM-DD"),
+    limit: int = Query(200, ge=1, le=500),
+):
+    filters = []
+    params: list = []
+
+    if league_id is not None:
+        filters.append("f.league_id = ?")
+        params.append(league_id)
+
+    if status == "upcoming":
+        filters.append("f.status IN ('NS', 'LIVE', '1H', '2H', 'HT')")
+    elif status == "finished":
+        filters.append("f.status = 'FT'")
+    elif status is not None:
+        filters.append("f.status = ?")
+        params.append(status.upper())
+
+    if date_from:
+        filters.append("DATE(f.date_utc) >= ?")
+        params.append(date_from)
+    if date_to:
+        filters.append("DATE(f.date_utc) <= ?")
+        params.append(date_to)
+
+    where = ("WHERE " + " AND ".join(filters)) if filters else ""
+    params.append(limit)
+
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"""SELECT f.fixture_id, f.league_id, f.date_utc, f.status,
+                       f.home_goals, f.away_goals,
+                       th.name AS home_team, th.logo_url AS home_logo,
+                       ta.name AS away_team, ta.logo_url AS away_logo,
+                       (SELECT o.price FROM odds_snapshots o
+                        WHERE o.fixture_id = f.fixture_id AND o.market='h2h'
+                          AND o.outcome_name='Home'
+                        ORDER BY o.fetched_at DESC LIMIT 1) AS odds_home,
+                       (SELECT o.price FROM odds_snapshots o
+                        WHERE o.fixture_id = f.fixture_id AND o.market='h2h'
+                          AND o.outcome_name='Draw'
+                        ORDER BY o.fetched_at DESC LIMIT 1) AS odds_draw,
+                       (SELECT o.price FROM odds_snapshots o
+                        WHERE o.fixture_id = f.fixture_id AND o.market='h2h'
+                          AND o.outcome_name='Away'
+                        ORDER BY o.fetched_at DESC LIMIT 1) AS odds_away
+               FROM fixtures f
+               JOIN teams th ON f.home_id = th.team_id
+               JOIN teams ta ON f.away_id = ta.team_id
+               {where}
+               ORDER BY f.date_utc DESC
+               LIMIT ?""",
+            params,
+        ).fetchall()
+
+    out = []
+    for r in rows:
+        out.append({
+            "fixture_id": r["fixture_id"],
+            "league": LEAGUE_NAMES.get(r["league_id"], f"League {r['league_id']}"),
+            "league_id": r["league_id"],
+            "kickoff": r["date_utc"],
+            "status": r["status"],
+            "home_team": r["home_team"],
+            "home_logo": r["home_logo"],
+            "away_team": r["away_team"],
+            "away_logo": r["away_logo"],
+            "score": {
+                "home": r["home_goals"],
+                "away": r["away_goals"],
+            },
+            "odds": {
+                "home": round(r["odds_home"], 2) if r["odds_home"] else None,
+                "draw": round(r["odds_draw"], 2) if r["odds_draw"] else None,
+                "away": round(r["odds_away"], 2) if r["odds_away"] else None,
+            },
+        })
+    return {"count": len(out), "fixtures": out}
+
+
+# ──────────────────────────────────────────────────────────────────────────
 #  2. Value Scanner — markets with edge > threshold
 # ──────────────────────────────────────────────────────────────────────────
 

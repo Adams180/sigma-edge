@@ -10,6 +10,7 @@ import RefWatch from './pages/RefWatch';
 import LineupAlerts from './pages/LineupAlerts';
 import LiveFeed from './pages/LiveFeed';
 import Performance from './pages/Performance';
+import Fixtures from './pages/Fixtures';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 import SettingsPage from './pages/SettingsPage';
@@ -37,6 +38,7 @@ function AppLayout() {
           <div className="max-w-[1400px] mx-auto p-6 lg:p-8 flex flex-col gap-6">
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/fixtures" element={<Fixtures />} />
               <Route path="/scanner" element={<ValueScanner />} />
               <Route path="/signals" element={<SignalHistory />} />
               <Route path="/live" element={<LiveFeed />} />
