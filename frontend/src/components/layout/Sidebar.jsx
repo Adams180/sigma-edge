@@ -17,6 +17,15 @@ import {
   ChevronsLeft,
   ChevronsRight,
   CalendarDays,
+  Activity,
+  AlertTriangle,
+  Ghost,
+  DollarSign,
+  GitMerge,
+  Bell,
+  Clock,
+  BookOpen,
+  Coffee,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -27,6 +36,8 @@ const NAV_SECTIONS = [
     items: [
       { path: '/', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/fixtures', label: 'Fixtures', icon: CalendarDays },
+      { path: '/pulse', label: 'Pulse Mode', icon: Activity, badge: 'LIVE' },
+      { path: '/morning-brief', label: 'Morning Brief', icon: Coffee },
     ],
   },
   {
@@ -36,11 +47,17 @@ const NAV_SECTIONS = [
       { path: '/signals', label: 'Signal History', icon: History },
       { path: '/live', label: 'Live Feed', icon: Radio },
       { path: '/performance', label: 'Performance', icon: BarChart3 },
+      { path: '/bankroll', label: 'Bankroll Scenarios', icon: DollarSign },
     ],
   },
   {
     title: 'INTELLIGENCE',
     items: [
+      { path: '/anomalies', label: 'Anomaly Radar', icon: AlertTriangle },
+      { path: '/narrative', label: 'Narrative Engine', icon: BookOpen },
+      { path: '/parlay', label: 'Parlay Finder', icon: GitMerge },
+      { path: '/ghost', label: 'Ghost Model', icon: Ghost },
+      { path: '/time-machine', label: 'Time Machine', icon: Clock },
       { path: '/referees', label: 'Referee Intel', icon: Shield },
       { path: '/lineups', label: 'Lineup Monitor', icon: Users },
     ],
@@ -48,6 +65,7 @@ const NAV_SECTIONS = [
   {
     title: 'OTHERS',
     items: [
+      { path: '/alerts', label: 'Smart Alerts', icon: Bell },
       { path: '/settings', label: 'Settings', icon: Settings },
       { path: '/help', label: 'Help', icon: HelpCircle },
     ],
@@ -104,7 +122,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                   <Icon size={18} />
                   {!collapsed && <span>{item.label}</span>}
                   {!collapsed && item.badge !== undefined && (
-                    <span className="sidebar-badge">{item.badge}</span>
+                    <span className="sidebar-badge" style={item.badge === 'LIVE' ? { background: 'rgba(34,197,94,0.15)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)' } : undefined}>{item.badge}</span>
                   )}
                 </NavLink>
               );
