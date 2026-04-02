@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Sidebar from './components/layout/Sidebar';
@@ -25,13 +26,15 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-base)' }}>
-      <Sidebar />
-      <div className="flex-1 flex flex-col ml-[220px]">
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
+      <div className="flex-1 flex flex-col transition-[margin] duration-200" style={{ marginLeft: collapsed ? 64 : 220 }}>
         <TopBar />
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-[1400px] mx-auto p-6 lg:p-8 flex flex-col gap-5">
+          <div className="max-w-[1400px] mx-auto p-6 lg:p-8 flex flex-col gap-6">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/scanner" element={<ValueScanner />} />

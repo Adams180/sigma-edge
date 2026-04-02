@@ -14,8 +14,8 @@ import {
   Moon,
   Search,
   HelpCircle,
-  MessageSquare,
-  Rocket,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -52,36 +52,43 @@ const NAV_SECTIONS = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <aside className="se-sidebar">
+    <aside className={`se-sidebar ${collapsed ? 'collapsed' : ''}`}>
       {/* Brand */}
       <div className="sidebar-brand">
         <div className="sidebar-brand-icon">
           <Zap size={18} className="text-white" />
         </div>
-        <div className="flex flex-col">
-          <span className="sidebar-brand-text">Sigma Edge</span>
-          <span className="sidebar-brand-sub">Intelligence</span>
-        </div>
+        {!collapsed && (
+          <div className="flex flex-col">
+            <span className="sidebar-brand-text">Sigma Edge</span>
+            <span className="sidebar-brand-sub">Intelligence</span>
+          </div>
+        )}
+        <button onClick={onToggle} className="sidebar-collapse-btn" title={collapsed ? 'Expand' : 'Collapse'}>
+          {collapsed ? <ChevronsRight size={16} /> : <ChevronsLeft size={16} />}
+        </button>
       </div>
 
       {/* Search */}
-      <div className="sidebar-search">
-        <Search size={16} />
-        <span>Search...</span>
-        <kbd>⌘K</kbd>
-      </div>
+      {!collapsed && (
+        <div className="sidebar-search">
+          <Search size={16} />
+          <span>Search...</span>
+          <kbd>⌘K</kbd>
+        </div>
+      )}
 
       {/* Navigation Sections */}
       <nav className="sidebar-nav">
         {NAV_SECTIONS.map((section) => (
           <div key={section.title} className="sidebar-section">
-            <p className="sidebar-section-title">{section.title}</p>
+            {!collapsed && <p className="sidebar-section-title">{section.title}</p>}
             {section.items.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -90,10 +97,11 @@ export default function Sidebar() {
                   key={item.path}
                   to={item.path}
                   className={`sidebar-item ${isActive ? 'active' : ''}`}
+                  title={collapsed ? item.label : undefined}
                 >
                   <Icon size={18} />
-                  <span>{item.label}</span>
-                  {item.badge !== undefined && (
+                  {!collapsed && <span>{item.label}</span>}
+                  {!collapsed && item.badge !== undefined && (
                     <span className="sidebar-badge">{item.badge}</span>
                   )}
                 </NavLink>
@@ -106,28 +114,18 @@ export default function Sidebar() {
       {/* Bottom Actions */}
       <div className="py-3 px-2 border-t border-[var(--color-border-subtle)] space-y-0.5">
         {/* Theme Toggle */}
-        <button onClick={toggleTheme} className="sidebar-item">
+        <button onClick={toggleTheme} className="sidebar-item" title={collapsed ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : undefined}>
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          {!collapsed && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
         </button>
 
         {/* Sign Out */}
         {user && (
-          <button onClick={signOut} className="sidebar-item">
+          <button onClick={signOut} className="sidebar-item" title={collapsed ? 'Sign Out' : undefined}>
             <LogOut size={18} />
-            <span>Sign Out</span>
+            {!collapsed && <span>Sign Out</span>}
           </button>
         )}
-      </div>
-
-      {/* Trial Banner */}
-      <div className="sidebar-trial">
-        <div className="trial-illustration">
-          <Rocket size={28} className="text-[var(--color-primary)] mx-auto" />
-        </div>
-        <p className="trial-title">Trial Ending Soon!</p>
-        <p className="trial-desc">Your access expires in 6 days. Upgrade now for access.</p>
-        <button className="trial-cta">Upgrades to Pro</button>
       </div>
     </aside>
   );

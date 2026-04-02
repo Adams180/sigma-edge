@@ -364,6 +364,47 @@ body {
   top: 0; left: 0;
   z-index: 50;
   overflow-y: auto;
+  transition: width 0.2s ease;
+}
+.se-sidebar.collapsed {
+  width: 64px;
+}
+
+.sidebar-collapse-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+.sidebar-collapse-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+/* Collapsed overrides */
+.se-sidebar.collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 1rem 0.5rem 0.8rem;
+}
+.se-sidebar.collapsed .sidebar-collapse-btn {
+  margin-left: 0;
+}
+.se-sidebar.collapsed .sidebar-item {
+  justify-content: center;
+  padding: 0.6rem;
+}
+.se-sidebar.collapsed .sidebar-section {
+  margin-bottom: 0.3rem;
+}
+.se-sidebar.collapsed .sidebar-nav {
+  padding: 0.4rem 0.3rem;
 }
 
 .sidebar-brand {
@@ -438,47 +479,29 @@ body {
   min-width: 22px; text-align: center;
 }
 
-/* Sidebar trial / upgrade banner */
-.sidebar-trial {
-  margin: 0.75rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, var(--color-bg-elevated), var(--color-bg-card));
-  border: 1px solid var(--color-border-default);
-  border-radius: 12px;
-  text-align: center;
-}
-.trial-illustration { margin-bottom: 0.4rem; }
-.trial-title { font-size: 0.82rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 0.2rem; }
-.trial-desc { font-size: 0.72rem; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 0.6rem; }
-.trial-cta {
-  width: 100%; padding: 0.5rem; border: none;
-  background: var(--color-primary); color: #fff;
-  font-size: 0.78rem; font-weight: 600; border-radius: 8px;
-  cursor: pointer; transition: background 0.15s;
-}
-.trial-cta:hover { background: #5558E6; }
+/* (trial banner removed) */
 
 /* ═══════════════════════════════════════════════════════════
    DASHBOARD KPI CARDS
    ═══════════════════════════════════════════════════════════ */
 .fs-kpi-grid-top {
-  display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 1rem;
+  display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 1.25rem;
 }
 .fs-kpi-grid-small {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
 }
 
 .fs-kpi-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 12px;
-  padding: 1.2rem 1.3rem;
+  border-radius: 14px;
+  padding: 1.5rem 1.6rem;
 }
-.fs-kpi-card.wide { padding: 1.2rem 1.5rem; }
+.fs-kpi-card.wide { padding: 1.5rem 1.8rem; }
 
 .fs-kpi-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 0.6rem;
+  margin-bottom: 1rem;
 }
 .fs-kpi-label { font-size: 0.82rem; font-weight: 500; color: var(--color-text-secondary); }
 .fs-kpi-label-sm { font-size: 0.78rem; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 0.35rem; }
@@ -489,7 +512,7 @@ body {
 .fs-kpi-menu:hover { color: var(--color-text-secondary); background: var(--color-bg-hover); }
 
 .fs-kpi-value {
-  font-size: 2rem; font-weight: 700; color: var(--color-text-primary);
+  font-size: 2.2rem; font-weight: 700; color: var(--color-text-primary);
   letter-spacing: -0.03em; line-height: 1.1;
 }
 .fs-kpi-value-lg {
@@ -499,7 +522,7 @@ body {
 
 .fs-kpi-delta {
   display: flex; align-items: center; gap: 0.3rem;
-  margin-top: 0.5rem; font-size: 0.75rem; font-weight: 500;
+  margin-top: 0.75rem; font-size: 0.78rem; font-weight: 500;
 }
 .fs-kpi-delta.positive { color: var(--color-success); }
 .fs-kpi-delta.negative { color: var(--color-danger); }
@@ -547,14 +570,14 @@ body {
    BOTTOM GRID — Tables, Charts, Checklist
    ═══════════════════════════════════════════════════════════ */
 .fs-bottom-grid {
-  display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 1rem;
+  display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 1.25rem;
 }
 
 .fs-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 12px;
-  padding: 1.2rem;
+  border-radius: 14px;
+  padding: 1.5rem;
 }
 
 .fs-card-header {
@@ -720,7 +743,6 @@ body {
 .light .fs-table td { border-bottom-color: #F3F4F6; }
 .light .fs-table tr:hover td { background: #F9FAFB; }
 .light .sidebar-search { background: #F9FAFB; border-color: #E5E7EB; }
-.light .sidebar-trial { background: linear-gradient(135deg, #F3F4F6, #FAFAFE); border-color: #E5E7EB; }
 .light .fs-donut-bg { stroke: #E5E7EB; }
 .light .fs-league-row { background: #F9FAFB; }
 
