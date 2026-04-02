@@ -4,12 +4,7 @@ import { TrendingUp, Target, Zap, BarChart3, ArrowRight, Trophy, Activity } from
 import { Link } from 'react-router-dom';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
-
-async function loadBacktest() {
-  const res = await fetch('/data/backtest_v2_results.json');
-  if (!res.ok) throw new Error('No backtest data');
-  return res.json();
-}
+import api from '../api';
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -17,7 +12,10 @@ export default function Dashboard() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    loadBacktest().then(setData).catch(() => {}).finally(() => setLoading(false));
+    api.v2Backtest()
+      .then(setData)
+      .catch(() => fetch('/data/backtest_v2_results.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setData(d); }).catch(() => {}))
+      .finally(() => setLoading(false));
   }, []);
 
   const s = data?.summary;

@@ -9,13 +9,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
-
-// Load backtest results JSON — placed in public/ at build time or fetched
-async function loadResults() {
-  const res = await fetch('/data/backtest_v2_results.json');
-  if (!res.ok) throw new Error('Failed to load backtest results');
-  return res.json();
-}
+import api from '../api';
 
 function formatPct(v) {
   if (v == null) return '—';
@@ -60,9 +54,14 @@ export default function Performance() {
   };
 
   useEffect(() => {
-    loadResults()
+    api.v2Backtest()
       .then(setData)
-      .catch(e => setError(e.message))
+      .catch(() =>
+        fetch('/data/backtest_v2_results.json')
+          .then(r => { if (!r.ok) throw new Error('No data'); return r.json(); })
+          .then(setData)
+          .catch(e => setError(e.message))
+      )
       .finally(() => setLoading(false));
   }, []);
 

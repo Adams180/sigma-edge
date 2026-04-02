@@ -2,12 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { PageHeader, LoadingSpinner, LeagueBadge, EVBadge, ProGate } from '../components/ui';
 import { History, Search, Filter, ChevronDown, ChevronUp, CheckCircle, XCircle, ArrowUpDown } from 'lucide-react';
 import { useTier } from '../hooks/useTier';
-
-async function loadBacktest() {
-  const res = await fetch('/data/backtest_v2_results.json');
-  if (!res.ok) throw new Error('No backtest data');
-  return res.json();
-}
+import api from '../api';
 
 export default function SignalHistory() {
   const { isPro } = useTier();
@@ -22,7 +17,10 @@ export default function SignalHistory() {
   const [expandedIdx, setExpandedIdx] = useState(null);
 
   useEffect(() => {
-    loadBacktest().then(setData).catch(() => {}).finally(() => setLoading(false));
+    api.v2Backtest()
+      .then(setData)
+      .catch(() => fetch('/data/backtest_v2_results.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setData(d); }).catch(() => {}))
+      .finally(() => setLoading(false));
   }, []);
 
   const signals = data?.signals || [];
