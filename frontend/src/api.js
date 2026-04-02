@@ -17,6 +17,9 @@ export const api = {
   fixtures: ({ league_id, status, date_from, date_to, limit = 200 } = {}) =>
     fetchJSON(`${BASE}/fixtures`, { league_id, status, date_from, date_to, limit }),
 
+  teamLogos: () =>
+    fetchJSON(`${BASE}/teams/logos`),
+
   valueScanner: (bankroll = 1000, threshold = 0.07) =>
     fetchJSON(`${BASE}/value-scanner`, { bankroll, threshold }),
 

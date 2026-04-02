@@ -197,6 +197,19 @@ def all_fixtures(
 
 
 # ──────────────────────────────────────────────────────────────────────────
+#  1c. Team logos — name → logo_url map for frontend lookups
+# ──────────────────────────────────────────────────────────────────────────
+
+@app.get("/api/teams/logos")
+def team_logos():
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT name, logo_url FROM teams WHERE logo_url IS NOT NULL"
+        ).fetchall()
+    return {"logos": {r["name"]: r["logo_url"] for r in rows}}
+
+
+# ──────────────────────────────────────────────────────────────────────────
 #  2. Value Scanner — markets with edge > threshold
 # ──────────────────────────────────────────────────────────────────────────
 

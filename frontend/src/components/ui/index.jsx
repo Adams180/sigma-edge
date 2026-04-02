@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTeamLogos } from '../../contexts/TeamLogosContext';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 export { default as ProGate } from './ProGate';
 
@@ -153,7 +154,10 @@ function initials(name = '') {
 
 export function TeamLogo({ name = '', logo, size = 28 }) {
   const [failed, setFailed] = useState(false);
-  const showFallback = !logo || failed;
+  const logoMap = useTeamLogos();
+  // Prefer explicit prop, then context lookup by name, then fallback
+  const resolvedLogo = logo || logoMap[name] || null;
+  const showFallback = !resolvedLogo || failed;
 
   if (showFallback) {
     return (
@@ -176,7 +180,7 @@ export function TeamLogo({ name = '', logo, size = 28 }) {
   }
   return (
     <img
-      src={logo}
+      src={resolvedLogo}
       alt={name}
       title={name}
       width={size}
