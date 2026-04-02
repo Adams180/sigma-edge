@@ -1,4 +1,6 @@
-import { useState } from 'react';import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useTier } from '../hooks/useTier';
 import { PageHeader } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
 import { Settings, User, CreditCard, Bell, Shield, Check, Zap, Crown, Sun, Moon } from 'lucide-react';
@@ -65,7 +67,8 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 export default function SettingsPage() {
   const { user, profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const currentTier = profile?.tier ?? 'free';
+  const { isSuperAdmin } = useTier();
+  const currentTier = isSuperAdmin ? 'elite' : (profile?.tier ?? 'free');
   const [notifications, setNotifications] = useState({
     signals: true,
     daily: false,
@@ -246,6 +249,11 @@ export default function SettingsPage() {
                   ))}
                 </ul>
 
+                {isSuperAdmin ? (
+                  <div className="w-full py-2.5 rounded-lg text-sm font-semibold text-center bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                    {tier.id === 'elite' ? '★ Super Admin' : 'Unlocked'}
+                  </div>
+                ) : (
                 <button
                   disabled={isCurrent || checkoutLoading === tier.id}
                   onClick={() => !isCurrent && handleUpgrade(tier.id)}
@@ -260,6 +268,7 @@ export default function SettingsPage() {
                 >
                   {isCurrent ? 'Current Plan' : checkoutLoading === tier.id ? 'Loading…' : `Upgrade to ${tier.name}`}
                 </button>
+                )}
               </div>
             );
           })}
