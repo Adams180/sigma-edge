@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LoadingSpinner, LeagueBadge, EVBadge } from '../components/ui';
+import { LoadingSpinner, LeagueBadge, EVBadge, TeamLogo } from '../components/ui';
 import {
   TrendingUp,
   TrendingDown,
@@ -225,18 +225,29 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentSignals.slice(0, 6).map((sig, i) => (
-                  <tr key={`${sig.date}-${sig.match}-${i}`}>
-                    <td style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>{sig.match}</td>
-                    <td>{sig.league}</td>
-                    <td>{sig.ev > 0 ? `+${(sig.ev * 100).toFixed(1)}%` : `${(sig.ev * 100).toFixed(1)}%`}</td>
-                    <td>
-                      <span className={`fs-status ${sig.won ? 'won' : 'lost'}`}>
-                        {sig.won ? 'Won' : 'Lost'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {recentSignals.slice(0, 6).map((sig, i) => {
+                  const parts = sig.match?.split(' vs ');
+                  const home = parts?.[0]?.trim() || '';
+                  const away = parts?.[1]?.trim() || '';
+                  return (
+                    <tr key={`${sig.date}-${sig.match}-${i}`}>
+                      <td style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>
+                        <div className="flex items-center gap-1.5">
+                          <TeamLogo name={home} size={16} />
+                          <span>{sig.match}</span>
+                          <TeamLogo name={away} size={16} />
+                        </div>
+                      </td>
+                      <td>{sig.league}</td>
+                      <td>{sig.ev > 0 ? `+${(sig.ev * 100).toFixed(1)}%` : `${(sig.ev * 100).toFixed(1)}%`}</td>
+                      <td>
+                        <span className={`fs-status ${sig.won ? 'won' : 'lost'}`}>
+                          {sig.won ? 'Won' : 'Lost'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

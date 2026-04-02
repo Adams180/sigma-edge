@@ -95,6 +95,26 @@ def start_scheduler() -> None:
             misfire_grace_time=3600,
         )
 
+        # Re-sync team logos weekly (Monday 05:00 UTC) to catch newly missing logos
+        def _job_logos():
+            try:
+                from ingest_logos import ingest_logos
+                # Re-run on all teams not just null, to catch any newly added
+                from database import get_conn as _gc
+                with _gc() as _c:
+                    _c.execute("UPDATE teams SET logo_url = NULL WHERE logo_url IS NOT NULL")
+                ingest_logos()
+            except Exception:
+                log.exception("[scheduler] Weekly logo refresh failed")
+
+        _scheduler.add_job(
+            _job_logos,
+            trigger=CronTrigger(day_of_week="mon", hour=5, minute=0, timezone="UTC"),
+            id="weekly_logos",
+            replace_existing=True,
+            misfire_grace_time=3600,
+        )
+
         _scheduler.start()
         log.info("[scheduler] Started (upcoming every 30min, CSV daily at 04:15 UTC)")
 
@@ -108,6 +128,14 @@ def start_scheduler() -> None:
             log.info("[scheduler] DB already has data — skipping CSV seed")
         # Always refresh upcoming fixtures on start
         _job_upcoming()
+        # Seed team logos from API-Football (only updates rows where logo_url IS NULL)
+        try:
+            from ingest_logos import ingest_logos
+            log.info("[scheduler] Logo seed start")
+            n = ingest_logos()
+            log.info("[scheduler] Logo seed done — %d teams updated", n)
+        except Exception:
+            log.exception("[scheduler] Logo seed failed")
 
     t = threading.Thread(target=_initial_seed, daemon=True, name="initial-seed")
     t.start()

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge } from '../components/ui';
+import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, TeamLogo } from '../components/ui';
 import { Calendar, Clock, Filter, ChevronDown, ChevronUp, Activity, CheckCircle } from 'lucide-react';
 import api from '../api';
 
@@ -102,10 +102,13 @@ function FixtureCard({ fixture }) {
       <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
         {/* Home */}
         <div className="flex flex-col items-end gap-0.5 flex-1 min-w-0">
-          <span className={`text-sm font-semibold truncate max-w-full text-right
-            ${isFinished && hasScore && fixture.score.home > fixture.score.away ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>
-            {fixture.home_team}
-          </span>
+          <div className="flex items-center gap-2 justify-end">
+            <span className={`text-sm font-semibold truncate max-w-[120px] text-right
+              ${isFinished && hasScore && fixture.score.home > fixture.score.away ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>
+              {fixture.home_team}
+            </span>
+            <TeamLogo name={fixture.home_team} logo={fixture.home_logo} size={24} />
+          </div>
         </div>
 
         {/* Score / VS */}
@@ -129,10 +132,13 @@ function FixtureCard({ fixture }) {
 
         {/* Away */}
         <div className="flex flex-col items-start gap-0.5 flex-1 min-w-0">
-          <span className={`text-sm font-semibold truncate max-w-full
-            ${isFinished && hasScore && fixture.score.away > fixture.score.home ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>
-            {fixture.away_team}
-          </span>
+          <div className="flex items-center gap-2">
+            <TeamLogo name={fixture.away_team} logo={fixture.away_logo} size={24} />
+            <span className={`text-sm font-semibold truncate max-w-[120px]
+              ${isFinished && hasScore && fixture.score.away > fixture.score.home ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'}`}>
+              {fixture.away_team}
+            </span>
+          </div>
         </div>
       </div>
 

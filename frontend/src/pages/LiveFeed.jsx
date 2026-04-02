@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, StatusBadge } from '../components/ui';
 import { Radio, Calendar, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Target } from 'lucide-react';
 import api from '../api';
+import { TeamLogo } from '../components/ui';
 
 const LEAGUE_COLORS = {
   'Premier League': 'from-purple-500/20 to-purple-600/5',
@@ -88,11 +89,22 @@ export default function LiveFeed() {
                 }`}
                 onClick={() => setExpanded(isOpen ? null : i)}
               >
-                <div className={`p-4 bg-gradient-to-r ${LEAGUE_COLORS[s.league] || ''}`}>
+                <div className="p-4 bg-gradient-to-r " style={{backgroundImage: `linear-gradient(to right, ${s.won ? 'rgba(48,177,48,0.08)' : 'rgba(223,27,65,0.06)'}, transparent)`}}>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <LeagueBadge league={s.league} />
-                      <span className="text-sm font-bold text-text-primary">{s.match}</span>
+                      {(() => {
+                        const parts = s.match?.split(' vs ');
+                        const home = parts?.[0]?.trim() || '';
+                        const away = parts?.[1]?.trim() || '';
+                        return (
+                          <div className="flex items-center gap-1.5">
+                            <TeamLogo name={home} size={20} />
+                            <span className="text-sm font-bold text-text-primary">{s.match}</span>
+                            <TeamLogo name={away} size={20} />
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="flex items-center gap-3">
                       <StatusBadge status={s.won ? 'success' : 'danger'}>

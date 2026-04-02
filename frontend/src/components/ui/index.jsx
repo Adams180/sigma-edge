@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 export { default as ProGate } from './ProGate';
 
@@ -134,3 +135,55 @@ export function PageHeader({ title, subtitle, children }) {
     </div>
   );
 }
+
+// ── TeamLogo ──────────────────────────────────────────────────────────────
+// Shows team crest from logo_url; falls back to a coloured circle with initials.
+const LOGO_PALETTE = [
+  '#635BFF','#0EBFE9','#F5A623','#30B130','#DF1B41',
+  '#9B59B6','#E67E22','#1ABC9C','#3498DB','#E74C3C',
+];
+function logoColor(name = '') {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return LOGO_PALETTE[h % LOGO_PALETTE.length];
+}
+function initials(name = '') {
+  return name.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+}
+
+export function TeamLogo({ name = '', logo, size = 28 }) {
+  const [failed, setFailed] = useState(false);
+  const showFallback = !logo || failed;
+
+  if (showFallback) {
+    return (
+      <div
+        style={{
+          width: size, height: size, minWidth: size,
+          background: logoColor(name),
+          borderRadius: 6,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: size * 0.36,
+          fontWeight: 700,
+          color: '#fff',
+          userSelect: 'none',
+        }}
+        title={name}
+      >
+        {initials(name)}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={logo}
+      alt={name}
+      title={name}
+      width={size}
+      height={size}
+      style={{ width: size, height: size, minWidth: size, objectFit: 'contain', borderRadius: 4 }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+

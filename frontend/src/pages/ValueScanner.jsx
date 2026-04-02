@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
-import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, EVBadge, ProGate } from '../components/ui';
+import { PageHeader, LoadingSpinner, EmptyState, LeagueBadge, EVBadge, ProGate, TeamLogo } from '../components/ui';
 import { TrendingUp, Search, SlidersHorizontal, Wifi, WifiOff } from 'lucide-react';
 import { useTier } from '../hooks/useTier';
 
@@ -129,7 +129,18 @@ export default function ValueScanner() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <LeagueBadge league={s.league} />
-                    <span className="text-base font-bold text-text-primary">{s.match}</span>
+                    {(() => {
+                      const parts = s.match?.split(' vs ');
+                      const home = parts?.[0]?.trim() || '';
+                      const away = parts?.[1]?.trim() || '';
+                      return (
+                        <div className="flex items-center gap-2">
+                          <TeamLogo name={home} logo={s.home_logo} size={22} />
+                          <span className="text-base font-bold text-text-primary">{s.match}</span>
+                          <TeamLogo name={away} logo={s.away_logo} size={22} />
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="flex items-center gap-3">
                     <EVBadge ev={s.ev} />
