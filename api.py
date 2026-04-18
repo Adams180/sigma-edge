@@ -558,6 +558,112 @@ def v2_signals(bankroll: float = Query(1000.0, ge=1)):
     }
 
 
+@app.get("/api/v2/sure-picks")
+def v2_sure_picks(
+    bankroll: float = Query(1000.0, ge=1),
+    league: str | None = Query(None, description="Filter by league name"),
+):
+    """
+    Sure Picks — high-confidence selections with strong model edge.
+    Filters for: confidence >= 1.15, edge >= 5%, model prob >= 45%.
+    Returns signals ranked by a composite score.
+    """
+    predictor = _get_predictor()
+    predictor.bankroll = bankroll
+
+    try:
+        all_signals = predictor.scan_all()
+    except Exception as e:
+        log.exception("Sure picks scan failed")
+        return {"error": str(e), "picks": []}
+
+    # Sure-pick thresholds
+    MIN_CONFIDENCE = 1.12    # model must be ≥12% more confident than market
+    MIN_EDGE = 0.04          # ≥4% edge
+    MIN_MODEL_PROB = 0.40    # model must believe ≥40% chance
+
+    picks = []
+    for s in all_signals:
+        if s.confidence < MIN_CONFIDENCE:
+            continue
+        if s.edge < MIN_EDGE:
+            continue
+        if s.calibrated_prob < MIN_MODEL_PROB:
+            continue
+        if league and s.league.lower() != league.lower():
+            continue
+
+        # Composite score: weighted blend of confidence, edge, and model probability
+        score = (s.confidence * 0.35) + (s.edge * 100 * 0.35) + (s.calibrated_prob * 0.30)
+
+        # Star rating: 1-5 based on score
+        if score >= 2.0:
+            stars = 5
+        elif score >= 1.5:
+            stars = 4
+        elif score >= 1.0:
+            stars = 3
+        elif score >= 0.7:
+            stars = 2
+        else:
+            stars = 1
+
+        picks.append({
+            "match": f"{s.home_team} vs {s.away_team}",
+            "home_team": s.home_team,
+            "away_team": s.away_team,
+            "league": s.league,
+            "kickoff": s.commence_time,
+            "outcome": s.outcome,
+            "model_prob": s.calibrated_prob,
+            "market_prob": s.market_prob,
+            "decimal_odds": s.decimal_odds,
+            "bookmaker": s.bookmaker,
+            "ev": s.ev,
+            "edge": s.edge,
+            "confidence": s.confidence,
+            "kelly_pct": s.kelly_pct,
+            "stake_amount": round(bankroll * s.kelly_pct, 2),
+            "score": round(score, 3),
+            "stars": stars,
+            "reason": _pick_reason(s),
+        })
+
+    # Sort by composite score descending
+    picks.sort(key=lambda p: p["score"], reverse=True)
+
+    return {
+        "generated": datetime.now(timezone.utc).isoformat(),
+        "bankroll": bankroll,
+        "total_picks": len(picks),
+        "engine": "v2-dixon-coles-sure",
+        "picks": picks,
+    }
+
+
+def _pick_reason(s) -> str:
+    """Generate a human-readable reason for the pick."""
+    reasons = []
+    if s.calibrated_prob >= 0.60:
+        reasons.append(f"Model gives {s.calibrated_prob*100:.0f}% probability")
+    elif s.calibrated_prob >= 0.45:
+        reasons.append(f"Strong {s.calibrated_prob*100:.0f}% model probability")
+
+    if s.edge >= 0.10:
+        reasons.append(f"huge {s.edge*100:.1f}% edge over market")
+    elif s.edge >= 0.06:
+        reasons.append(f"significant {s.edge*100:.1f}% edge")
+    else:
+        reasons.append(f"{s.edge*100:.1f}% edge detected")
+
+    if s.confidence >= 1.3:
+        reasons.append(f"confidence {s.confidence:.1f}x above market")
+    elif s.confidence >= 1.15:
+        reasons.append(f"confidence ratio {s.confidence:.2f}x")
+
+    return " — ".join(reasons) if reasons else "Model edge detected"
+
+
 @app.get("/api/v2/backtest")
 def v2_backtest():
     """Serve the latest backtest results JSON."""

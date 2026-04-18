@@ -48,6 +48,9 @@ export const api = {
   v2Signals: (bankroll = 1000) =>
     fetchJSON(`${BASE}/v2/signals`, { bankroll }),
 
+  v2SurePicks: (bankroll = 1000, league = null) =>
+    fetchJSON(`${BASE}/v2/sure-picks`, { bankroll, league }),
+
   v2Backtest: () =>
     fetchJSON(`${BASE}/v2/backtest`),
 };

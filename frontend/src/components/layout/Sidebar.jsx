@@ -45,7 +45,7 @@ const NAV_SECTIONS = [
   {
     title: 'ANALYTICS',
     items: [
-      { path: '/scanner', label: 'Value Scanner', icon: TrendingUp },
+      { path: '/scanner', label: 'Sure Picks & Scanner', icon: TrendingUp },
       { path: '/signals', label: 'Signal History', icon: History },
       { path: '/live', label: 'Live Feed', icon: Radio },
       { path: '/performance', label: 'Performance', icon: BarChart3 },
