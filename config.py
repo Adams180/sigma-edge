@@ -6,8 +6,8 @@ API keys are read from environment variables for security.
 import os
 
 # ── API Keys (set these as environment variables) ─────────────────────────
-API_FOOTBALL_KEY = os.environ.get("API_FOOTBALL_KEY", "")
-THE_ODDS_API_KEY = os.environ.get("THE_ODDS_API_KEY", "")
+API_FOOTBALL_KEY = os.environ.get("API_FOOTBALL_KEY", "2b217d8f24d9285a8491bc73c372c4ac")
+THE_ODDS_API_KEY = os.environ.get("THE_ODDS_API_KEY", "0f5a0c6dc69bfb1490a23a8777161665")
 
 # ── API-Football settings ─────────────────────────────────────────────────
 API_FOOTBALL_BASE = "https://v3.football.api-sports.io"

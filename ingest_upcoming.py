@@ -1,12 +1,11 @@
 """
-Ingest upcoming fixtures and live h2h odds from The Odds API.
+Ingest upcoming fixtures and live h2h odds.
 
-Unlike ingest_odds.py (which only stores odds for existing fixtures),
-this module *creates* fixture records from Odds API event data — seeding
-the DB with upcoming matches even without an API-Football subscription.
+Primary source: The Odds API (provides fixtures + odds together).
+Fallback source: API-Football /fixtures?next=N (fixtures only, no odds).
 
-Team IDs are generated via the same hash function used in ingest_csv.py
-so that historical stats and upcoming fixtures share common team records.
+When The Odds API quota is exhausted the fallback ensures the app still
+shows upcoming matches.
 """
 
 from __future__ import annotations
@@ -15,7 +14,8 @@ import logging
 from datetime import datetime, timezone
 
 import odds_api
-from config import ODDS_SPORT_KEYS
+import api_football
+from config import ODDS_SPORT_KEYS, LEAGUES, CURRENT_SEASON, WORLD_CUP_SEASON
 from database import get_conn
 from ingest_csv import team_id_from_name, fixture_id_from_parts
 
@@ -161,4 +161,81 @@ def ingest_upcoming() -> int:
         log.info("Upcoming ingest: %s → %d events", sport_key, len(events))
 
     log.info("Upcoming ingest complete: %d fixtures total", total)
+
+    # If Odds API returned nothing (quota exhausted?), fall back to API-Football
+    if total == 0:
+        log.warning("Odds API returned 0 fixtures — falling back to API-Football")
+        total = _fallback_api_football()
+
+    return total
+
+
+def _fallback_api_football() -> int:
+    """
+    Pull next upcoming fixtures from API-Football for each league.
+    No odds data — just ensures the fixture list is populated.
+    Uses ~8 API calls (1 per league), well within 100/day free tier.
+    """
+    total = 0
+    for league_id, (league_name, _country) in LEAGUES.items():
+        season = WORLD_CUP_SEASON if league_id == 1 else CURRENT_SEASON
+        try:
+            fixtures = api_football.get_fixtures(league_id, season, next="10")
+        except Exception as exc:
+            log.warning("API-Football fallback failed for %s: %s", league_name, exc)
+            continue
+
+        with get_conn() as conn:
+            for fx in fixtures:
+                info = fx.get("fixture", {})
+                teams = fx.get("teams", {})
+                league = fx.get("league", {})
+
+                home_raw = teams.get("home", {}).get("name", "")
+                away_raw = teams.get("away", {}).get("name", "")
+                date_utc = info.get("date", "")  # ISO-8601
+
+                if not home_raw or not away_raw or not date_utc:
+                    continue
+
+                home_name = _normalise(home_raw)
+                away_name = _normalise(away_raw)
+
+                home_tid = team_id_from_name(home_name)
+                away_tid = team_id_from_name(away_name)
+
+                date_key = date_utc[:10]
+                fix_id = fixture_id_from_parts(league_id, home_tid, away_tid, date_key)
+
+                # Upsert teams (with logo if available)
+                home_logo = teams.get("home", {}).get("logo", "")
+                away_logo = teams.get("away", {}).get("logo", "")
+
+                conn.execute(
+                    "INSERT INTO teams (team_id, name, logo_url) VALUES (?, ?, ?)"
+                    " ON CONFLICT(team_id) DO UPDATE SET name=excluded.name,"
+                    " logo_url=COALESCE(NULLIF(excluded.logo_url,''), teams.logo_url)",
+                    (home_tid, home_name, home_logo),
+                )
+                conn.execute(
+                    "INSERT INTO teams (team_id, name, logo_url) VALUES (?, ?, ?)"
+                    " ON CONFLICT(team_id) DO UPDATE SET name=excluded.name,"
+                    " logo_url=COALESCE(NULLIF(excluded.logo_url,''), teams.logo_url)",
+                    (away_tid, away_name, away_logo),
+                )
+
+                conn.execute(
+                    """INSERT INTO fixtures
+                           (fixture_id, league_id, season, date_utc,
+                            home_id, away_id, status)
+                       VALUES (?, ?, ?, ?, ?, ?, 'NS')
+                       ON CONFLICT(fixture_id) DO UPDATE SET
+                           date_utc=excluded.date_utc""",
+                    (fix_id, league_id, season, date_utc, home_tid, away_tid),
+                )
+                total += 1
+
+        log.info("API-Football fallback: %s → %d fixtures", league_name, len(fixtures))
+
+    log.info("API-Football fallback complete: %d fixtures total", total)
     return total
