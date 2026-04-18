@@ -29,16 +29,16 @@
   --color-info-dim: rgba(59, 130, 246, 0.12);
 
   /* ── Background Layers (dark defaults) ── */
-  --color-bg-base: #0B0E11;
-  --color-bg-surface: #111418;
-  --color-bg-card: #171B20;
-  --color-bg-elevated: #1E2228;
-  --color-bg-hover: #252A31;
+  --color-bg-base: #000000;
+  --color-bg-surface: #0A0A0A;
+  --color-bg-card: #0F0F0F;
+  --color-bg-elevated: #161616;
+  --color-bg-hover: #1C1C1C;
 
   /* ── Borders (dark defaults) ── */
-  --color-border-subtle: rgba(255, 255, 255, 0.07);
-  --color-border-default: rgba(255, 255, 255, 0.12);
-  --color-border-strong: rgba(255, 255, 255, 0.20);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.10);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
 
   /* ── Text (dark defaults) ── */
   --color-text-primary: #F0F2F5;
@@ -53,13 +53,13 @@
    DARK MODE (default)
    ═══════════════════════════════════════════════════════════ */
 :root, .dark {
-  --color-bg-input: #171B20;
-  --color-bg-wash: #0B0E11;
+  --color-bg-input: #0F0F0F;
+  --color-bg-wash: #000000;
   --color-border-focus: #6366F1;
   --color-text-link: #818CF8;
   --color-text-on-primary: #FFFFFF;
-  --color-shadow: rgba(0, 0, 0, 0.5);
-  --color-shadow-card: rgba(0, 0, 0, 0.3);
+  --color-shadow: rgba(0, 0, 0, 0.6);
+  --color-shadow-card: rgba(0, 0, 0, 0.4);
   --stripe-gradient: linear-gradient(135deg, #6366F1 0%, #06B6D4 100%);
   --color-purple: #A855F7;
   --color-blue: #3B82F6;
@@ -440,7 +440,7 @@ body {
 }
 .page-shell.sidebar-open {
   transform: translateX(260px);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
 }
 
 .page-shell-overlay {
