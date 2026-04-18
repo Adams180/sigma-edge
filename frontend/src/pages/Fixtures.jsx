@@ -10,6 +10,9 @@ const LEAGUES = [
   { id: 135,   name: 'Serie A' },
   { id: 78,    name: 'Bundesliga' },
   { id: 61,    name: 'Ligue 1' },
+  { id: 2,     name: 'Champions League' },
+  { id: 3,     name: 'Europa League' },
+  { id: 1,     name: 'World Cup' },
 ];
 
 const STATUS_TABS = [

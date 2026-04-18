@@ -29,6 +29,8 @@ _SPORT_TO_LEAGUE: dict[str, int] = {
     "soccer_germany_bundesliga":    78,
     "soccer_france_ligue_one":      61,
     "soccer_uefa_champs_league":    2,
+    "soccer_uefa_europa_league":    3,
+    "soccer_fifa_world_cup":        1,
 }
 
 # Odds API sometimes uses different team names than football-data.co.uk.

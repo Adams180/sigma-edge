@@ -12,10 +12,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Search,
-  HelpCircle,
-  ChevronsLeft,
-  ChevronsRight,
   CalendarDays,
   Activity,
   AlertTriangle,
@@ -29,10 +25,9 @@ import {
   Trophy,
   Shuffle,
   Copy,
-  Target,
+  Flame,
   Syringe,
   CloudRain,
-  Flame,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -80,88 +75,99 @@ const NAV_SECTIONS = [
       { path: '/challenge', label: 'Daily Challenge', icon: Flame },
     ],
   },
-  {
-    title: 'OTHERS',
-    items: [
-      { path: '/alerts', label: 'Smart Alerts', icon: Bell },
-      { path: '/settings', label: 'Settings', icon: Settings },
-      { path: '/help', label: 'Help', icon: HelpCircle },
-    ],
-  },
 ];
 
-export default function Sidebar({ collapsed, onToggle }) {
+/**
+ * Off-canvas sidebar — fixed behind the page shell.
+ * When open, the page shell slides right to reveal it.
+ */
+export default function Sidebar({ onNavigate }) {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  return (
-    <aside className={`se-sidebar ${collapsed ? 'collapsed' : ''}`}>
-      {/* Brand */}
-      <div className="sidebar-brand">
-        <div className="sidebar-brand-icon">
-          <Zap size={18} className="text-white" />
-        </div>
-        {!collapsed && (
-          <div className="flex flex-col">
-            <span className="sidebar-brand-text">Sigma Edge</span>
-            <span className="sidebar-brand-sub">Intelligence</span>
-          </div>
-        )}
-        <button onClick={onToggle} className="sidebar-collapse-btn" title={collapsed ? 'Expand' : 'Collapse'}>
-          {collapsed ? <ChevronsRight size={16} /> : <ChevronsLeft size={16} />}
-        </button>
-      </div>
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
 
-      {/* Search */}
-      {!collapsed && (
-        <div className="sidebar-search">
-          <Search size={16} />
-          <span>Search...</span>
-          <kbd>⌘K</kbd>
-        </div>
-      )}
+  return (
+    <aside className="se-sidebar">
+      {/* Spacer matching topbar height */}
+      <div className="h-16 shrink-0" />
 
       {/* Navigation Sections */}
       <nav className="sidebar-nav">
-        {NAV_SECTIONS.map((section) => (
+        {NAV_SECTIONS.map((section, idx) => (
           <div key={section.title} className="sidebar-section">
-            {!collapsed && <p className="sidebar-section-title">{section.title}</p>}
-            {section.items.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={`sidebar-item ${isActive ? 'active' : ''}`}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon size={18} />
-                  {!collapsed && <span>{item.label}</span>}
-                  {!collapsed && item.badge !== undefined && (
-                    <span className="sidebar-badge" style={item.badge === 'LIVE' ? { background: 'rgba(34,197,94,0.15)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)' } : undefined}>{item.badge}</span>
-                  )}
-                </NavLink>
-              );
-            })}
+            {idx > 0 && <div className="sidebar-divider" />}
+            <p className="sidebar-section-title">{section.title}</p>
+            <div className="sidebar-section-items">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.path);
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={onNavigate}
+                    className={`sidebar-item ${active ? 'active' : ''}`}
+                  >
+                    {active && <span className="sidebar-active-indicator" />}
+                    <Icon size={17} />
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span
+                        className="sidebar-badge"
+                        style={
+                          item.badge === 'LIVE'
+                            ? {
+                                background: 'rgba(34,197,94,0.15)',
+                                color: '#22C55E',
+                                border: '1px solid rgba(34,197,94,0.3)',
+                              }
+                            : undefined
+                        }
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
           </div>
         ))}
       </nav>
 
-      {/* Bottom Actions */}
-      <div className="py-3 px-2 border-t border-[var(--color-border-subtle)] space-y-0.5">
-        {/* Theme Toggle */}
-        <button onClick={toggleTheme} className="sidebar-item" title={collapsed ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : undefined}>
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          {!collapsed && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+      {/* Bottom: Settings, Theme, Sign Out */}
+      <div className="sidebar-bottom">
+        <NavLink
+          to="/alerts"
+          onClick={onNavigate}
+          className={`sidebar-item ${isActive('/alerts') ? 'active' : ''}`}
+        >
+          {isActive('/alerts') && <span className="sidebar-active-indicator" />}
+          <Bell size={17} />
+          <span>Smart Alerts</span>
+        </NavLink>
+        <NavLink
+          to="/settings"
+          onClick={onNavigate}
+          className={`sidebar-item ${isActive('/settings') ? 'active' : ''}`}
+        >
+          {isActive('/settings') && <span className="sidebar-active-indicator" />}
+          <Settings size={17} />
+          <span>Settings</span>
+        </NavLink>
+        <button onClick={toggleTheme} className="sidebar-item">
+          {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
         </button>
-
-        {/* Sign Out */}
         {user && (
-          <button onClick={signOut} className="sidebar-item" title={collapsed ? 'Sign Out' : undefined}>
-            <LogOut size={18} />
-            {!collapsed && <span>Sign Out</span>}
+          <button onClick={signOut} className="sidebar-item">
+            <LogOut size={17} />
+            <span>Sign Out</span>
           </button>
         )}
       </div>

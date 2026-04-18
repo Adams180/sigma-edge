@@ -4,3 +4,10 @@ uvicorn[standard]>=0.27
 stripe>=8.0
 python-dotenv>=1.0
 apscheduler>=3.10,<4
+# Bayesian inference & probabilistic modeling
+pymc>=5.10
+arviz>=0.17
+# Causal inference with Bayesian networks
+# causalnex — REMOVED: abandoned, only supports Python <3.9
+# Alternative: pgmpy for Bayesian network structure learning
+pgmpy>=0.0.4

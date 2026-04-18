@@ -15,7 +15,7 @@ API_FOOTBALL_HEADERS = {
     "x-apisports-key": API_FOOTBALL_KEY,
 }
 
-# Top 5 European leagues + Champions League
+# Top 5 European leagues + Champions League + Europa League + World Cup
 # league_id: (name, country)
 LEAGUES = {
     39:  ("Premier League", "England"),
@@ -24,10 +24,15 @@ LEAGUES = {
     78:  ("Bundesliga", "Germany"),
     61:  ("Ligue 1", "France"),
     2:   ("Champions League", "Europe"),
+    3:   ("Europa League", "Europe"),
+    1:   ("World Cup", "World"),
 }
 
 # Current season (update each year)
 CURRENT_SEASON = 2025
+
+# World Cup uses its own season year (tournament year)
+WORLD_CUP_SEASON = 2026
 
 # ── The Odds API settings ─────────────────────────────────────────────────
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
@@ -40,6 +45,8 @@ ODDS_SPORT_KEYS = [
     "soccer_germany_bundesliga",
     "soccer_france_ligue_one",
     "soccer_uefa_champs_league",
+    "soccer_uefa_europa_league",
+    "soccer_fifa_world_cup",
 ]
 
 # ── Database ──────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
-import { Search, Sun, Moon, Settings, Bell } from 'lucide-react';
+import { Search, Sun, Moon, Settings, Bell, Menu, X, Zap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
-export default function TopBar() {
+export default function TopBar({ onToggleSidebar, sidebarOpen }) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -12,14 +12,20 @@ export default function TopBar() {
 
   return (
     <header className="se-topbar">
-      {/* Left: User info */}
-      <div className="topbar-user">
-        <div className="topbar-avatar">
-          <span>{initial}</span>
-        </div>
-        <div>
-          <p className="topbar-username">{name}</p>
-          <span className="topbar-role-badge">Member</span>
+      {/* Left: Menu toggle + Brand */}
+      <div className="topbar-left">
+        <button
+          onClick={onToggleSidebar}
+          className="topbar-icon-btn"
+          title={sidebarOpen ? 'Close menu' : 'Open menu'}
+        >
+          {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
+        <div className="topbar-brand">
+          <div className="topbar-brand-icon">
+            <Zap size={14} className="text-white" />
+          </div>
+          <span className="topbar-brand-text">Sigma Edge</span>
         </div>
       </div>
 
@@ -45,9 +51,11 @@ export default function TopBar() {
         <button className="topbar-icon-btn" title="Notifications">
           <Bell size={16} />
         </button>
-        <button className="topbar-icon-btn" title="Settings">
-          <Settings size={16} />
-        </button>
+        <div className="topbar-user">
+          <div className="topbar-avatar">
+            <span>{initial}</span>
+          </div>
+        </div>
       </div>
     </header>
   );

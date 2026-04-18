@@ -95,14 +95,10 @@ def start_scheduler() -> None:
             misfire_grace_time=3600,
         )
 
-        # Re-sync team logos weekly (Monday 05:00 UTC) to catch newly missing logos
+        # Re-sync team logos weekly (Monday 05:00 UTC) to catch newly added teams
         def _job_logos():
             try:
                 from ingest_logos import ingest_logos
-                # Re-run on all teams not just null, to catch any newly added
-                from database import get_conn as _gc
-                with _gc() as _c:
-                    _c.execute("UPDATE teams SET logo_url = NULL WHERE logo_url IS NOT NULL")
                 ingest_logos()
             except Exception:
                 log.exception("[scheduler] Weekly logo refresh failed")

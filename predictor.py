@@ -46,8 +46,12 @@ log = logging.getLogger(__name__)
 SPORT_TO_LEAGUE = {
     "soccer_epl": "Premier League",
     "soccer_spain_la_liga": "La Liga",
+    "soccer_italy_serie_a": "Serie A",
+    "soccer_germany_bundesliga": "Bundesliga",
     "soccer_france_ligue_one": "Ligue 1",
-    # Serie A and Bundesliga disabled — no proven edge
+    "soccer_uefa_champs_league": "Champions League",
+    "soccer_uefa_europa_league": "Europa League",
+    "soccer_fifa_world_cup": "World Cup",
 }
 
 # Map CSV league_id to our league name

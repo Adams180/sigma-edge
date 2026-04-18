@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { TeamLogosProvider } from './contexts/TeamLogosContext';
 import Sidebar from './components/layout/Sidebar';
@@ -43,13 +43,44 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const toggleSidebar = useCallback(() => setSidebarOpen(prev => !prev), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Close sidebar on Escape
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape' && sidebarOpen) setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [sidebarOpen]);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-base)' }}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
-      <div className="flex-1 flex flex-col transition-[margin] duration-200" style={{ marginLeft: collapsed ? 64 : 220 }}>
-        <TopBar />
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: 'var(--color-bg-elevated)' }}>
+      {/* Sidebar: fixed underneath, always rendered */}
+      <Sidebar onNavigate={closeSidebar} />
+
+      {/* Page shell: slides right when sidebar opens */}
+      <div
+        className={`page-shell ${sidebarOpen ? 'sidebar-open' : ''}`}
+      >
+        {/* Click-to-close overlay — inside page shell so it doesn't block sidebar */}
+        {sidebarOpen && (
+          <div
+            className="page-shell-overlay"
+            onClick={closeSidebar}
+          />
+        )}
+
+        <TopBar onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-[1400px] mx-auto p-6 lg:p-8 flex flex-col gap-6">
             <Routes>
